@@ -420,48 +420,48 @@ const COLORS=[
 ];
 
 const SCHEDULES={
-  t24:{label:'SEO · Học',chip:'lc-a',notice:'🎯 <strong>Tiêu điểm tối nay: học SEO + nghiên cứu từ khóa — đầu vào cho bài blog.</strong> Một việc duy nhất, không nhảy môn. Tự học tạo ra của cải — đây là tài sản không ai dạy trong trường.',
+  t24:{label:'SEO · Study',chip:'lc-a',notice:'🎯 <strong>Focus tonight: study SEO + keyword research — input for your blog post.</strong> One thing only, no subject-hopping. Self-education builds wealth — an asset no school teaches.',
     rows:[
-      {id:1, time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
-      {id:2, time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm — mục tiêu 3–4 buổi/tuần (không bắt buộc)', color:'purple', section:'Trong giờ làm'},
-      {id:3, time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Trưa'},
-      {id:4, time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Tối'},
+      {id:1, time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Morning'},
+      {id:2, time:'flexible',  task:'Python/LLM 30–45′ trong giờ làm — mục tiêu 3–4 buổi/tuần (không bắt buộc)', color:'purple', section:'During work'},
+      {id:3, time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Noon'},
+      {id:4, time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Evening'},
       {id:5, time:'19:30–20:00',task:'Coupon: lên store + ads mồi tìm dự án (dùng template, làm nhanh)', color:'coral', section:''},
-      {id:6, time:'20:00–21:30',task:'SEO: học lý thuyết + nghiên cứu từ khóa đuôi dài, chuẩn bị bài blog', color:'amber', section:'Tiêu điểm tối nay',hl:true},
-      {id:7, time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Hạ màn'},
+      {id:6, time:'20:00–21:30',task:'SEO: học lý thuyết + nghiên cứu từ khóa đuôi dài, chuẩn bị bài blog', color:'amber', section:'Focus tonight',hl:true},
+      {id:7, time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Wind down'},
       {id:8, time:'21:45–22:00',task:'Wind down — tắt màn hình',                                        color:'gray',  section:''},
     ]},
-  t36:{label:'SEO · Viết',chip:'lc-a',notice:'✍️ <strong>Tiêu điểm tối nay: VIẾT + đăng 1 bài blog chuẩn SEO.</strong> Xong trước, đẹp sau. Một việc duy nhất. Mỗi bài hữu ích là viên gạch đối thủ làm ẩu không sao chép nhanh được.',
+  t36:{label:'SEO · Write',chip:'lc-a',notice:'✍️ <strong>Focus tonight: WRITE + publish 1 SEO-ready blog post.</strong> Done first, polished later. One thing only. Every useful post is a brick sloppy competitors cannot copy fast.',
     rows:[
-      {id:10,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
-      {id:11,time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm — 3–4 buổi/tuần (không bắt buộc)',  color:'purple', section:'Trong giờ làm'},
-      {id:12,time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Trưa'},
-      {id:13,time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Tối'},
+      {id:10,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Morning'},
+      {id:11,time:'flexible',  task:'Python/LLM 30–45′ trong giờ làm — 3–4 buổi/tuần (không bắt buộc)',  color:'purple', section:'During work'},
+      {id:12,time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Noon'},
+      {id:13,time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Evening'},
       {id:14,time:'19:30–20:00',task:'Coupon: lên store + ads mồi tìm dự án (template, làm nhanh)',      color:'coral', section:''},
-      {id:15,time:'20:00–21:30',task:'SEO: viết + publish 1 bài blog (theo dây chuyền 90′)',            color:'amber', section:'Tiêu điểm tối nay',hl:true},
-      {id:16,time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Hạ màn'},
+      {id:15,time:'20:00–21:30',task:'SEO: viết + publish 1 bài blog (theo dây chuyền 90′)',            color:'amber', section:'Focus tonight',hl:true},
+      {id:16,time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Wind down'},
       {id:17,time:'21:45–22:00',task:'Wind down — tắt màn hình',                                        color:'gray',  section:''},
     ]},
-  thu:{label:'Coaching',chip:'lc-k',notice:'📌 <strong>Toàn bộ năng lượng cho coaching a Thùy.</strong> Bạn là trung bình cộng của 5 người quanh mình. Đến với ≥3 câu hỏi thực chiến — và áp dụng vào blog trong 48h, nếu không là lãng phí buổi học.',
+  thu:{label:'Coaching',chip:'lc-k',notice:'📌 <strong>All your energy on coaching with Thùy.</strong> You are the average of the five people around you. Come with ≥3 real-world questions — and apply them to your blog within 48h, or the session is wasted.',
     rows:[
-      {id:20,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
-      {id:21,time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm (nếu sắp xếp được)',               color:'purple', section:'Trong giờ làm'},
-      {id:22,time:'12:00–12:30',task:'Đọc sách 30′',                                                    color:'blue',  section:'Trưa'},
-      {id:23,time:'19:00–19:30',task:'Về nhà + ăn tối nhanh',                                           color:'gray',  section:'Tối'},
+      {id:20,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Morning'},
+      {id:21,time:'flexible',  task:'Python/LLM 30–45′ trong giờ làm (nếu sắp xếp được)',               color:'purple', section:'During work'},
+      {id:22,time:'12:00–12:30',task:'Đọc sách 30′',                                                    color:'blue',  section:'Noon'},
+      {id:23,time:'19:00–19:30',task:'Về nhà + ăn tối nhanh',                                           color:'gray',  section:'Evening'},
       {id:24,time:'19:30–20:00',task:'Coupon nhanh: lên store + ads mồi (template)',                    color:'coral', section:''},
       {id:25,time:'20:00–21:00',task:'Chuẩn bị ≥3 câu hỏi thực chiến cho a Thùy',                       color:'amber', section:''},
       {id:26,time:'21:00–22:30',task:'Coaching SEO với a Thùy — ưu tiên tuyệt đối',                     color:'pink',  section:'Coaching',hl:true},
       {id:27,time:'22:30+',     task:'Duolingo nhanh + ghi note → ngủ',                                 color:'teal',  section:''},
     ]},
-  weekend:{label:'Khung giờ vàng',chip:'lc-a',notice:'⚡ <strong>Khung giờ vàng — não tươi nhất tuần.</strong> Việc khó nhất gặp năng lượng cao nhất: viết bài blog sâu + rà ngách ads nào có tín hiệu mua. Không chia nhỏ nhiều môn.',
+  weekend:{label:'Golden Hours',chip:'lc-a',notice:'⚡ <strong>Golden hours — your sharpest brain of the week.</strong> Hardest work meets highest energy: write a deep blog post + scan which ad niches show buying signals. Do not split into many subjects.',
     rows:[
-      {id:30,time:'8:00–10:00', task:'Rà ads cả tuần: ngách nào ads mồi có tín hiệu mua? Tắt ngách chết', color:'coral', section:'Sáng'},
+      {id:30,time:'8:00–10:00', task:'Rà ads cả tuần: ngách nào ads mồi có tín hiệu mua? Tắt ngách chết', color:'coral', section:'Morning'},
       {id:31,time:'10:00–11:30',task:'SEO deep: viết 1 bài blog dài, chất lượng cao',                    color:'amber', section:'',hl:true},
       {id:32,time:'11:30–12:00',task:'Duolingo + nghỉ',                                                 color:'teal',  section:''},
-      {id:33,time:'14:00–15:30',task:'SEO: nghiên cứu từ khóa + lên kế hoạch nội dung tuần sau',         color:'amber', section:'Chiều'},
+      {id:33,time:'14:00–15:30',task:'SEO: nghiên cứu từ khóa + lên kế hoạch nội dung tuần sau',         color:'amber', section:'Afternoon'},
       {id:34,time:'15:30–16:30',task:'Batch schedule social posts cả tuần',                             color:'green', section:''},
-      {id:35,time:'linh hoạt',  task:'Python/LLM nếu muốn — bù cho tuần (không bắt buộc)',               color:'purple', section:''},
-      {id:36,time:'20:00–21:00',task:'Đọc sách 60′',                                                    color:'blue',  section:'Tối'},
+      {id:35,time:'flexible',  task:'Python/LLM nếu muốn — bù cho tuần (không bắt buộc)',               color:'purple', section:''},
+      {id:36,time:'20:00–21:00',task:'Đọc sách 60′',                                                    color:'blue',  section:'Evening'},
     ]},
 };
 
@@ -511,7 +511,7 @@ function applySheetTasks(tasks,reset){
   (tasks||[]).forEach(t=>{
     const id=parseInt(t.task_id);
     if(!TSCH.rows.some(r=>r.id===id)){
-      TSCH.rows.push({id:id,time:t.scheduled_time||'',task:t.task_name||'(task)',color:catColor(t.category),section:'Tự thêm',custom:true});
+      TSCH.rows.push({id:id,time:t.scheduled_time||'',task:t.task_name||'(task)',color:catColor(t.category),section:'Added',custom:true});
       if(id>=idCnt)idCnt=id;
     }
     if(t.status==='done'){CK[id]=true;delete SK[id];}
@@ -574,7 +574,7 @@ function renderToday(){
   wrap.appendChild(tb);
   const tbl=document.createElement('div');tbl.className='sched';tbl.id='today-tbl';
   const ch=document.createElement('div');ch.className='colh';
-  ch.innerHTML='<span></span><span>Đề xuất</span><span>Task</span><span></span><span style="text-align:center">✓</span><span style="text-align:center">✗</span><span></span>';
+  ch.innerHTML='<span></span><span>Time</span><span>Task</span><span></span><span style="text-align:center">✓</span><span style="text-align:center">✗</span><span></span>';
   tbl.appendChild(ch);
   let ls=null;
   sch.rows.forEach(row=>{
@@ -691,7 +691,7 @@ function editTask(id){const cell=document.getElementById('tt-'+id);if(!cell||cel
 function openCP(e,id){e.stopPropagation();document.querySelectorAll('.cpick').forEach(c=>{if(c.id!=='cp-'+id)c.classList.remove('open');});const cp=document.getElementById('cp-'+id);if(cp)cp.classList.toggle('open');}
 document.addEventListener('click',()=>document.querySelectorAll('.cpick').forEach(c=>c.classList.remove('open')));
 function deleteRow(id){TSCH.rows.splice(TSCH.rows.findIndex(r=>r.id===id),1);delete CK[id];delete SK[id];svCk(CK);svSk(SK);renderToday();updateProg();pushProgress();}
-function addRow(){idCnt++;TSCH.rows.push({id:idCnt,time:'00:00–00:00',task:'Nhập tên task...',color:'gray',section:''});renderToday();setTimeout(()=>editTime(idCnt),60);}
+function addRow(){idCnt++;TSCH.rows.push({id:idCnt,time:'00:00–00:00',task:'Enter task name...',color:'gray',section:''});renderToday();setTimeout(()=>editTime(idCnt),60);}
 function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val,pw:AUTH_PW})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Saved!';setTimeout(()=>{btn.textContent=orig;},2000);}
 
 function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='track'){renderTracking();loadDaily();}if(id==='ideas')renderIdeas();}
