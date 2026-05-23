@@ -528,10 +528,10 @@ async function syncDown(){
     const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
     if(data.success&&data.tasks&&data.tasks.length>0){
-      applySheetTasks(data.tasks,true);loadDaily();pushProgress();
+      applySheetTasks(data.tasks,true);loadDaily();pushProgress();fetchIdeasFromSheet(true);
       sdot('ok');btn.innerHTML='✓ Synced ('+data.tasks.length+' tasks)';
     }else if(data.success){
-      applySheetTasks([],true);loadDaily();pushProgress();
+      applySheetTasks([],true);loadDaily();pushProgress();fetchIdeasFromSheet(true);
       sdot('ok');btn.innerHTML='No data for today yet';
     }else{
       sdot('err');btn.innerHTML=data.error==='unauthorized'?'✗ Wrong password':'✗ Error';
@@ -550,6 +550,7 @@ async function loadTodayAuto(){
       pushProgress();
     }
     loadDaily();
+    fetchIdeasFromSheet(false);
     sdot('ok');
   }catch(e){sdot(Object.keys(CK).length>0?'ok':'err');}
 }
@@ -704,6 +705,44 @@ let _ideaFilter='all';
 function loadIdeas(){try{return JSON.parse(localStorage.getItem('ideas_all')||'[]')}catch{return[];}}
 function saveIdeas(){try{localStorage.setItem('ideas_all',JSON.stringify(IDEAS))}catch{}}
 
+// ── SYNC IDEAS FROM SHEET ──
+// Sheet là nguồn gốc. reset=true (nút Sync): thay toàn bộ local bằng Sheet.
+// reset=false (auto load): gộp theo id, không xoá idea chỉ-có-local.
+function applySheetIdeas(sheetIdeas,reset){
+  const mapped=(sheetIdeas||[]).map(s=>({
+    id:Number(s.id),
+    date_added:s.date_added||TODAY,
+    text:s.idea||'',
+    color:s.color||'violet',
+    deadline:s.deadline||null,
+    status:s.status||'pending',
+    skip_reason:s.skip_reason||'',
+    date_done:s.date_done||null,
+  })).filter(x=>!isNaN(x.id));
+  if(reset){
+    IDEAS=mapped;
+  }else{
+    mapped.forEach(m=>{
+      const i=IDEAS.findIndex(x=>x.id===m.id);
+      if(i>=0)IDEAS[i]=m;else IDEAS.push(m);
+    });
+  }
+  saveIdeas();renderIdeaAlerts();
+  if(document.getElementById('panel-ideas').classList.contains('active'))renderIdeas();
+}
+async function fetchIdeasFromSheet(reset){
+  try{
+    const res=await fetch(AS_URL+'?action=get_ideas&pw='+encodeURIComponent(AUTH_PW));
+    const data=await res.json();
+    if(data.success&&Array.isArray(data.ideas)){applySheetIdeas(data.ideas,reset);return data.ideas.length;}
+  }catch(e){}
+  return null;
+}
+async function deleteIdeaFromSheet(id){
+  sdot('loading');
+  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'delete_idea',pw:AUTH_PW,id:String(id)})});sdot('ok');}catch(e){sdot('err');}
+}
+
 function addIdea(){
   const txt=document.getElementById('idea-text').value.trim();
   if(!txt)return;
@@ -765,7 +804,7 @@ function editIdeaName(id){
 function deleteIdea(id){
   if(!confirm('Delete this idea?'))return;
   IDEAS.splice(IDEAS.findIndex(x=>x.id===id),1);
-  saveIdeas();renderIdeas();renderIdeaAlerts();
+  saveIdeas();deleteIdeaFromSheet(id);renderIdeas();renderIdeaAlerts();
 }
 
 let _ideaColorSel2='violet';
