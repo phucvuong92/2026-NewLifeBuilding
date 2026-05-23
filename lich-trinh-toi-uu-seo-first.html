@@ -284,9 +284,32 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 
 @keyframes flashDone{0%,100%{background:var(--card)}50%{background:rgba(16,185,129,.12)}}
 .pdone{animation:flashDone .6s ease 3}
+
+/* ── AUTH GATE ── */
+#auth-gate{position:fixed;inset:0;z-index:3000;background:linear-gradient(160deg,#0B1420 0%,#111827 50%,#0D1B2A 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:#1A2332;border:1px solid var(--border2);border-radius:16px;padding:30px 26px;width:340px;max-width:92vw;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.auth-title{font-size:18px;font-weight:500;color:var(--text);margin-bottom:5px}
+.auth-sub{font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.5}
+.auth-card input{width:100%;border:1px solid var(--border2);border-radius:9px;padding:11px 13px;font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s;margin-bottom:12px}
+.auth-card input:focus{border-color:var(--accent)}
+.auth-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+.auth-btn:hover{background:#0EA572}.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{font-size:12px;color:#F87171;margin-top:11px;min-height:14px}
+.logout-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);transition:all .18s}
+.logout-btn:hover{background:var(--drag-bg);color:var(--text2)}
 </style>
 </head>
 <body>
+
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-title">🔒 Lịch trình cá nhân</div>
+    <div class="auth-sub">Nhập mật khẩu để truy cập</div>
+    <input type="password" id="auth-input" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="auth-btn" id="auth-btn" onclick="doLogin()">Đăng nhập</button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
 
 <div class="moverlay" id="idea-skip-modal">
   <div class="modal">
@@ -339,6 +362,7 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
           <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11.5 6.5A5 5 0 1 1 8 1.6"/><path d="M8 1v3.5H11.5"/></svg>
           Sync từ Sheet
         </button>
+        <button class="logout-btn" onclick="logout()" title="Đăng xuất">Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -379,6 +403,7 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 
 <script>
 const AS_URL='https://script.google.com/macros/s/AKfycbzUftympk-3AjcT9SKrJO-vOls7Op3J8XZtpgCvDDWdPS9jlU25lTHy2JUeq-qKJBKpVQ/exec';
+let AUTH_PW=localStorage.getItem('auth_pw')||'';
 
 const COLORS=[
   {id:'teal',  dot:'#1D9E75',tag:'rgba(16,185,129,.15)',tagText:'#34D399',label:'Tiếng Anh'},
@@ -474,7 +499,7 @@ function updateProg(){
 
 async function logTask(row,status,reason=''){
   sdot('loading');const c=getColor(row.color);
-  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_task',date:TODAY,task_id:String(row.id),task_name:row.task,category:c.label,tab_group:TK,scheduled_time:row.time,status,skip_reason:reason})});sdot('ok');}
+  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_task',date:TODAY,task_id:String(row.id),task_name:row.task,category:c.label,tab_group:TK,scheduled_time:row.time,status,skip_reason:reason,pw:AUTH_PW})});sdot('ok');}
   catch(e){sdot('err');}
 }
 
@@ -482,7 +507,7 @@ async function syncDown(){
   const btn=document.getElementById('btn-sy'),orig=btn.innerHTML;
   btn.disabled=true;btn.innerHTML='↻ Đang sync...';sdot('loading');
   try{
-    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY);
+    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
     if(data.success&&data.tasks&&data.tasks.length>0){
       CK={};SK={};
@@ -497,7 +522,7 @@ async function syncDown(){
 async function loadTodayAuto(){
   sdot('loading');
   try{
-    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY);
+    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
     if(data.success&&data.tasks&&data.tasks.length>0){
       data.tasks.forEach(t=>{const id=parseInt(t.task_id);if(t.status==='done'){CK[id]=true;delete SK[id];}else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];}});
@@ -644,7 +669,7 @@ function openCP(e,id){e.stopPropagation();document.querySelectorAll('.cpick').fo
 document.addEventListener('click',()=>document.querySelectorAll('.cpick').forEach(c=>c.classList.remove('open')));
 function deleteRow(id){TSCH.rows.splice(TSCH.rows.findIndex(r=>r.id===id),1);delete CK[id];delete SK[id];svCk(CK);svSk(SK);renderToday();updateProg();}
 function addRow(){idCnt++;TSCH.rows.push({id:idCnt,time:'00:00–00:00',task:'Nhập tên task...',color:'gray',section:''});renderToday();setTimeout(()=>editTime(idCnt),60);}
-function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Đã lưu!';setTimeout(()=>{btn.textContent=orig;},2000);}
+function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val,pw:AUTH_PW})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Đã lưu!';setTimeout(()=>{btn.textContent=orig;},2000);}
 
 function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='track')renderTracking();if(id==='ideas')renderIdeas();}
 
@@ -755,7 +780,7 @@ function setIdeaDeadline(id,val){
 async function logIdeaToSheet(idea){
   sdot('loading');
   try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({
-    action:'log_idea',
+    action:'log_idea',pw:AUTH_PW,
     id:String(idea.id),date_added:idea.date_added,idea:idea.text,
     color:idea.color,deadline:idea.deadline||'',status:idea.status,
     skip_reason:idea.skip_reason||'',date_done:idea.date_done||'',logged_at:TODAY,
@@ -1031,7 +1056,42 @@ function renderJim(){
 
 
 
-renderToday();renderJim();pomUI();initQuote();renderWeekStrip();updateProg();loadTodayAuto();
+let _booted=false;
+function bootApp(){
+  if(_booted)return;_booted=true;
+  renderToday();renderJim();pomUI();initQuote();renderWeekStrip();updateProg();loadTodayAuto();
+}
+async function doLogin(){
+  const inp=document.getElementById('auth-input'),btn=document.getElementById('auth-btn'),errEl=document.getElementById('auth-err');
+  const pw=inp.value;
+  if(!pw){errEl.textContent='Nhập mật khẩu';return;}
+  btn.disabled=true;errEl.textContent='Đang kiểm tra...';
+  try{
+    const res=await fetch(AS_URL+'?action=login&pw='+encodeURIComponent(pw));
+    const data=await res.json();
+    if(data.success&&data.authorized){
+      AUTH_PW=pw;localStorage.setItem('auth_pw',pw);
+      document.getElementById('auth-gate').style.display='none';
+      bootApp();
+    }else{errEl.textContent='Mật khẩu sai';btn.disabled=false;}
+  }catch(e){errEl.textContent='Lỗi kết nối — thử lại';btn.disabled=false;}
+}
+function logout(){localStorage.removeItem('auth_pw');AUTH_PW='';location.reload();}
+async function initAuth(){
+  if(AUTH_PW){
+    try{
+      const res=await fetch(AS_URL+'?action=login&pw='+encodeURIComponent(AUTH_PW));
+      const data=await res.json();
+      if(data.success&&data.authorized){document.getElementById('auth-gate').style.display='none';bootApp();return;}
+      localStorage.removeItem('auth_pw');AUTH_PW='';
+    }catch(e){
+      // Mất mạng: vẫn cho dùng offline bằng token đã lưu (server vẫn chặn ghi/đọc nếu sai)
+      document.getElementById('auth-gate').style.display='none';bootApp();return;
+    }
+  }
+  setTimeout(()=>{const i=document.getElementById('auth-input');if(i)i.focus();},120);
+}
+initAuth();
 document.addEventListener('click',()=>{const m=document.getElementById('idea-cpick-menu');if(m)m.classList.remove('open');});
 </script>
 </body>
