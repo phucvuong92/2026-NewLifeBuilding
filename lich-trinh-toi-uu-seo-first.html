@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch trình cá nhân</title>
+<title>Personal Schedule</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -199,7 +199,8 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 .trksec{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:0 0 9px}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px}
 .calh{font-size:10px;font-weight:600;text-align:center;color:var(--text3);padding:3px 0}
-.cald{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;border:1px solid transparent;transition:border-color .1s}
+.cald{min-height:58px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;border:1px solid transparent;transition:border-color .1s;padding:4px 2px}
+.calpct{font-size:9px;font-weight:500;line-height:1;text-align:center}
 .cald.has{border-color:var(--border2);cursor:pointer}.cald.td{border-color:var(--accent)!important;background:var(--accent-dim)}
 .cald.has:hover .caltip{display:block}
 .calnum{font-size:10px;color:var(--text3);line-height:1;font-variant-numeric:tabular-nums}
@@ -303,37 +304,37 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 
 <div id="auth-gate">
   <div class="auth-card">
-    <div class="auth-title">🔒 Lịch trình cá nhân</div>
-    <div class="auth-sub">Nhập mật khẩu để truy cập</div>
-    <input type="password" id="auth-input" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="auth-btn" id="auth-btn" onclick="doLogin()">Đăng nhập</button>
+    <div class="auth-title">🔒 Personal Schedule</div>
+    <div class="auth-sub">Enter password to access</div>
+    <input type="password" id="auth-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="auth-btn" id="auth-btn" onclick="doLogin()">Log in</button>
     <div class="auth-err" id="auth-err"></div>
   </div>
 </div>
 
 <div class="moverlay" id="idea-skip-modal">
   <div class="modal">
-    <div class="mtitle">Bỏ qua ý tưởng này</div>
-    <div class="msub">Ghi lý do để sau này nhìn lại biết tại sao không làm.</div>
+    <div class="mtitle">Skip this idea</div>
+    <div class="msub">Add a reason so you remember why later.</div>
     <div class="mtask" id="idea-modal-name"></div>
-    <textarea id="idea-modal-reason" placeholder="Ví dụ: Không đủ nguồn lực, đã có tool tương tự, ưu tiên thấp hơn..."></textarea>
+    <textarea id="idea-modal-reason" placeholder="E.g. not enough resources, a similar tool exists, lower priority..."></textarea>
     <div class="macts">
-      <button class="mbtn" onclick="closeIdeaSkip()">Huỷ</button>
-      <button class="mbtn ok" onclick="confirmIdeaSkip()">Xác nhận bỏ qua</button>
+      <button class="mbtn" onclick="closeIdeaSkip()">Cancel</button>
+      <button class="mbtn ok" onclick="confirmIdeaSkip()">Confirm skip</button>
     </div>
   </div>
 </div>
 
 <div class="moverlay" id="skip-modal">
   <div class="modal">
-    <div class="mtitle">Bỏ qua task này</div>
-    <div class="msub">Ghi lý do để Claude phân tích pattern theo tuần.</div>
+    <div class="mtitle">Skip this task</div>
+    <div class="msub">Add a reason to review weekly patterns.</div>
     <div class="mtask" id="modal-task"></div>
-    <textarea id="modal-reason" placeholder="Ví dụ: Mệt sau họp, coaching kéo dài, có việc gấp..."></textarea>
+    <textarea id="modal-reason" placeholder="E.g. tired after a meeting, coaching ran long, urgent task..."></textarea>
     <div class="macts">
-      <button class="mbtn" onclick="closeSkip()">Huỷ</button>
-      <button class="mbtn un" id="mbtn-undo" style="display:none" onclick="undoSkip()">↩ Bỏ skip</button>
-      <button class="mbtn ok" onclick="confirmSkip()">Xác nhận skip</button>
+      <button class="mbtn" onclick="closeSkip()">Cancel</button>
+      <button class="mbtn un" id="mbtn-undo" style="display:none" onclick="undoSkip()">↩ Undo skip</button>
+      <button class="mbtn ok" onclick="confirmSkip()">Confirm skip</button>
     </div>
   </div>
 </div>
@@ -341,8 +342,8 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 <div class="hdr" >
   <div class="hdr-left">
     <div>
-      <div class="hdr-title">Lịch trình <span class="sync-dot" id="sdot"></span></div>
-      <div class="hdr-sub">Tick ✓ hoàn thành · ✗ skip + lý do</div>
+      <div class="hdr-title">Schedule <span class="sync-dot" id="sdot"></span></div>
+      <div class="hdr-sub">Tick ✓ done · ✗ skip + reason</div>
     </div>
     <div style="display:flex;justify-content:center;margin:6px 0 2px">
       <svg width="76" height="76" viewBox="0 0 76 76" style="transform:rotate(-90deg)">
@@ -356,13 +357,13 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
       </svg>
     </div>
     <div>
-      <div class="prog-lbl" id="plbl">Đang tải...</div>
+      <div class="prog-lbl" id="plbl">Loading...</div>
       <div class="sheet-btns">
         <button class="sbt sy" id="btn-sy" onclick="syncDown()">
           <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11.5 6.5A5 5 0 1 1 8 1.6"/><path d="M8 1v3.5H11.5"/></svg>
-          Sync từ Sheet
+          Sync from Sheet
         </button>
-        <button class="logout-btn" onclick="logout()" title="Đăng xuất">Đăng xuất</button>
+        <button class="logout-btn" onclick="logout()" title="Log out">Log out</button>
       </div>
     </div>
   </div>
@@ -370,8 +371,8 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
   <div class="pom" id="pom">
     <div class="pom-modes">
       <button class="pmode active" onclick="setPomMain(this)">Pomodoro</button>
-      <button class="pmode" onclick="setPomMode(5,this);hideSub()">Nghỉ ngắn</button>
-      <button class="pmode" onclick="setPomMode(15,this);hideSub()">Nghỉ dài</button>
+      <button class="pmode" onclick="setPomMode(5,this);hideSub()">Short break</button>
+      <button class="pmode" onclick="setPomMode(15,this);hideSub()">Long break</button>
     </div>
     <div class="pom-sub" id="pom-sub">
       <button class="psub active" id="psub25" onclick="setPomMode(25,this)">25'</button>
@@ -383,17 +384,17 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
       <button class="pom-reset-btn" onclick="resetPom()">↺</button>
     </div>
     <div class="pom-quote" id="pom-quote"></div>
-    <div class="pom-mini-stats"><span id="pom-sessions-done">0</span> phiên · <span id="pom-minutes-done">0</span>' hôm nay</div>
+    <div class="pom-mini-stats"><span id="pom-sessions-done">0</span> sessions · <span id="pom-minutes-done">0</span>' today</div>
   </div>
 </div>
 
 <div class="wstrip" id="wstrip"></div>
 
 <div class="tabs">
-  <button class="tab active" id="tab-today" onclick="switchTab('today',this)">📋 Hôm nay</button>
-  <button class="tab" onclick="switchTab('track',this)">📊 Theo dõi</button>
-  <button class="tab" onclick="switchTab('jim',this)">Nguyên tắc Jim Rohn</button>
+  <button class="tab active" id="tab-today" onclick="switchTab('today',this)">📋 Today</button>
+  <button class="tab" onclick="switchTab('track',this)">📊 Stats</button>
   <button class="tab" onclick="switchTab('ideas',this)">💡 Ideas</button>
+  <button class="tab" onclick="switchTab('jim',this)">Principles</button>
 </div>
 
 <div id="panel-today" class="panel active"></div>
@@ -404,6 +405,7 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 <script>
 const AS_URL='https://script.google.com/macros/s/AKfycbzUftympk-3AjcT9SKrJO-vOls7Op3J8XZtpgCvDDWdPS9jlU25lTHy2JUeq-qKJBKpVQ/exec';
 let AUTH_PW=localStorage.getItem('auth_pw')||'';
+let DAILY={};
 
 const COLORS=[
   {id:'teal',  dot:'#1D9E75',tag:'rgba(16,185,129,.15)',tagText:'#34D399',label:'Tiếng Anh'},
@@ -467,10 +469,10 @@ const NOW=new Date();
 function dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const TODAY=dstr(NOW);
 const DOW=NOW.getDay();
-const VDL=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+const VDL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function getTodaySch(){if(DOW===1||DOW===3)return{key:'t24',sch:SCHEDULES.t24};if(DOW===2||DOW===5)return{key:'t36',sch:SCHEDULES.t36};if(DOW===4)return{key:'thu',sch:SCHEDULES.thu};return{key:'weekend',sch:SCHEDULES.weekend};}
 const{key:TK,sch:TSCH}=getTodaySch();
-document.getElementById('tab-today').textContent='📋 '+VDL[DOW]+', '+NOW.getDate()+'/'+(NOW.getMonth()+1);
+document.getElementById('tab-today').textContent='📋 Today';
 
 let idCnt=200,dragSrc=null;
 const CKK='ck_'+TODAY,SKK='sk_'+TODAY;
@@ -521,20 +523,20 @@ function applySheetTasks(tasks,reset){
 
 async function syncDown(){
   const btn=document.getElementById('btn-sy'),orig=btn.innerHTML;
-  btn.disabled=true;btn.innerHTML='↻ Đang sync...';sdot('loading');
+  btn.disabled=true;btn.innerHTML='↻ Syncing...';sdot('loading');
   try{
     const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
     if(data.success&&data.tasks&&data.tasks.length>0){
-      applySheetTasks(data.tasks,true);
-      sdot('ok');btn.innerHTML='✓ Sync xong ('+data.tasks.length+' task)';
+      applySheetTasks(data.tasks,true);loadDaily();pushProgress();
+      sdot('ok');btn.innerHTML='✓ Synced ('+data.tasks.length+' tasks)';
     }else if(data.success){
-      applySheetTasks([],true);
-      sdot('ok');btn.innerHTML='Sheet chưa có data hôm nay';
+      applySheetTasks([],true);loadDaily();pushProgress();
+      sdot('ok');btn.innerHTML='No data for today yet';
     }else{
-      sdot('err');btn.innerHTML=data.error==='unauthorized'?'✗ Sai mật khẩu':'✗ Lỗi';
+      sdot('err');btn.innerHTML=data.error==='unauthorized'?'✗ Wrong password':'✗ Error';
     }
-  }catch(e){sdot('err');btn.innerHTML='✗ Lỗi kết nối';}
+  }catch(e){sdot('err');btn.innerHTML='✗ Connection error';}
   setTimeout(()=>{btn.disabled=false;btn.innerHTML=orig;},3000);
 }
 
@@ -545,7 +547,9 @@ async function loadTodayAuto(){
     const data=await res.json();
     if(data.success&&data.tasks){
       applySheetTasks(data.tasks,false);
+      pushProgress();
     }
+    loadDaily();
     sdot('ok');
   }catch(e){sdot(Object.keys(CK).length>0?'ok':'err');}
 }
@@ -564,7 +568,7 @@ function renderToday(){
   </div>
   <button class="addbtn" onclick="addRow()">
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
-    Thêm task
+    Add task
   </button>`;
   wrap.appendChild(tb);
   const tbl=document.createElement('div');tbl.className='sched';tbl.id='today-tbl';
@@ -579,22 +583,22 @@ function renderToday(){
   wrap.appendChild(tbl);
   const dn=document.createElement('div');dn.className='dnwrap';
   const sn=localStorage.getItem('dnote_'+TODAY)||'';
-  dn.innerHTML=`<div class="dnlbl">Ghi chú ngày ${NOW.getDate()}/${NOW.getMonth()+1}</div>
-    <div class="dnrow"><input class="dninp" id="dninp" placeholder="Đạt được gì? Khó khăn gì? Cần điều chỉnh?" value="${sn}">
-    <button class="dnbtn" onclick="saveNote()">Lưu vào Sheet</button></div>`;
+  dn.innerHTML=`<div class="dnlbl">Day note ${NOW.getDate()}/${NOW.getMonth()+1}</div>
+    <div class="dnrow"><input class="dninp" id="dninp" placeholder="What did you get done? Any blockers? Adjustments?" value="${sn}">
+    <button class="dnbtn" onclick="saveNote()">Save to Sheet</button></div>`;
   wrap.appendChild(dn);
 
   const ideaWrap=document.createElement('div');ideaWrap.className='idea-input-wrap';
   const c0=getColor(_ideaColorSel);
   const cpOpts=COLORS.map(col=>`<div class="idea-cp-opt${col.id===_ideaColorSel?' sel':''}" style="background:${col.dot}" data-cid="${col.id}" onclick="setIdeaColor('${col.id}')" title="${col.label}"></div>`).join('');
-  ideaWrap.innerHTML=`<div class="dnlbl" style="color:#C084FC">💡 Thêm ý tưởng</div>
+  ideaWrap.innerHTML=`<div class="dnlbl" style="color:#C084FC">💡 Add idea</div>
     <div class="idea-row1" style="display:flex;gap:8px;align-items:center">
       <div class="idea-cpick-wrap">
-        <div class="idea-cpick-dot" id="idea-color-btn" style="background:${c0.dot}" onclick="toggleIdeaCpick(event)" title="Chọn màu"></div>
+        <div class="idea-cpick-dot" id="idea-color-btn" style="background:${c0.dot}" onclick="toggleIdeaCpick(event)" title="Pick color"></div>
         <div class="idea-cpick-menu" id="idea-cpick-menu">${cpOpts}</div>
       </div>
-      <input class="idea-text-inp" id="idea-text" placeholder="Mô tả ý tưởng..." onkeydown="if(event.key==='Enter')addIdea()" style="flex:1">
-      <label class="cb-wrap" title="Xác nhận thêm idea" onclick="addIdea()" style="cursor:pointer;flex-shrink:0">
+      <input class="idea-text-inp" id="idea-text" placeholder="Describe the idea..." onkeydown="if(event.key==='Enter')addIdea()" style="flex:1">
+      <label class="cb-wrap" title="Add idea" onclick="addIdea()" style="cursor:pointer;flex-shrink:0">
         <div class="cbb" id="idea-check-box" style="border-color:rgba(192,132,252,.4)">
           <span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span>
         </div>
@@ -619,7 +623,7 @@ function makeRow(row){
       <div class="cdot" style="background:${c.dot}" onclick="openCP(event,${row.id})"></div>
       <div style="flex:1">
         <span class="ttxt" id="tt-${row.id}" onclick="editTask(${row.id})">${row.task}</span>
-        ${isSkip?`<div><span class="skip-badge" title="${SK[row.id]||''}">⚠ ${SK[row.id]||'Đã skip'}</span></div>`:''}
+        ${isSkip?`<div><span class="skip-badge" title="${SK[row.id]||''}">⚠ ${SK[row.id]||'Skipped'}</span></div>`:''}
       </div>
     </div>
     <div class="tagcell"><span class="tag" style="background:${c.tag};color:${c.tagText}" onclick="openCP(event,${row.id})">${c.label}</span></div>
@@ -651,14 +655,14 @@ function toggleCheck(id,el){
   if(el.checked){CK[id]=true;delete SK[id];}else{delete CK[id];}
   svCk(CK);svSk(SK);
   const row=TSCH.rows.find(r=>r.id===id);if(row)logTask(row,el.checked?'done':'miss');
-  updateRowVis(id);updateProg();renderWeekStrip();
+  updateRowVis(id);updateProg();renderWeekStrip();pushProgress();
 }
 function updateRowVis(id){
   const r=document.querySelector(`.row[data-id="${id}"]`);if(!r)return;
   r.classList.toggle('done-row',!!CK[id]);r.classList.toggle('skip-row',id in SK);
   const sb=r.querySelector('.skipbtn');if(sb)sb.className='skipbtn'+(id in SK?' on':'');
   const tc=r.querySelector('.taskcell > div');
-  if(tc){let b=tc.querySelector('.skip-badge');if(id in SK){if(!b){b=document.createElement('div');tc.appendChild(b);}b.innerHTML=`<span class="skip-badge" title="${SK[id]||''}">⚠ ${SK[id]||'Đã skip'}</span>`;}else if(b)b.remove();}
+  if(tc){let b=tc.querySelector('.skip-badge');if(id in SK){if(!b){b=document.createElement('div');tc.appendChild(b);}b.innerHTML=`<span class="skip-badge" title="${SK[id]||''}">⚠ ${SK[id]||'Skipped'}</span>`;}else if(b)b.remove();}
 }
 
 let _sid=null;
@@ -675,9 +679,9 @@ function confirmSkip(){
   if(!_sid)return;const reason=document.getElementById('modal-reason').value.trim();
   SK[_sid]=reason;delete CK[_sid];svCk(CK);svSk(SK);
   const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'skip',reason);
-  updateRowVis(_sid);updateProg();renderWeekStrip();closeSkip();
+  updateRowVis(_sid);updateProg();renderWeekStrip();pushProgress();closeSkip();
 }
-function undoSkip(){if(!_sid)return;delete SK[_sid];svSk(SK);const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'miss');updateRowVis(_sid);closeSkip();}
+function undoSkip(){if(!_sid)return;delete SK[_sid];svSk(SK);const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'miss');updateRowVis(_sid);pushProgress();closeSkip();}
 document.getElementById('skip-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSkip();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSkip();});
 
@@ -685,11 +689,11 @@ function editTime(id){const cell=document.getElementById('tc-'+id);if(!cell||cel
 function editTask(id){const cell=document.getElementById('tt-'+id);if(!cell||cell.tagName==='INPUT')return;const val=cell.textContent;const inp=document.createElement('input');inp.className='tinpt';inp.value=val;inp.onclick=e=>e.stopPropagation();const save=()=>{const r=TSCH.rows.find(x=>x.id===id);if(r)r.task=inp.value||val;renderToday();};inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter'||e.key==='Escape')inp.blur();};cell.replaceWith(inp);inp.focus();inp.select();}
 function openCP(e,id){e.stopPropagation();document.querySelectorAll('.cpick').forEach(c=>{if(c.id!=='cp-'+id)c.classList.remove('open');});const cp=document.getElementById('cp-'+id);if(cp)cp.classList.toggle('open');}
 document.addEventListener('click',()=>document.querySelectorAll('.cpick').forEach(c=>c.classList.remove('open')));
-function deleteRow(id){TSCH.rows.splice(TSCH.rows.findIndex(r=>r.id===id),1);delete CK[id];delete SK[id];svCk(CK);svSk(SK);renderToday();updateProg();}
+function deleteRow(id){TSCH.rows.splice(TSCH.rows.findIndex(r=>r.id===id),1);delete CK[id];delete SK[id];svCk(CK);svSk(SK);renderToday();updateProg();pushProgress();}
 function addRow(){idCnt++;TSCH.rows.push({id:idCnt,time:'00:00–00:00',task:'Nhập tên task...',color:'gray',section:''});renderToday();setTimeout(()=>editTime(idCnt),60);}
-function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val,pw:AUTH_PW})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Đã lưu!';setTimeout(()=>{btn.textContent=orig;},2000);}
+function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val,pw:AUTH_PW})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Saved!';setTimeout(()=>{btn.textContent=orig;},2000);}
 
-function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='track')renderTracking();if(id==='ideas')renderIdeas();}
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='track'){renderTracking();loadDaily();}if(id==='ideas')renderIdeas();}
 
 // ── IDEAS ──
 const IDEAS_KEY='ideas_all';
@@ -759,7 +763,7 @@ function editIdeaName(id){
 }
 
 function deleteIdea(id){
-  if(!confirm('Xóa ý tưởng này?'))return;
+  if(!confirm('Delete this idea?'))return;
   IDEAS.splice(IDEAS.findIndex(x=>x.id===id),1);
   saveIdeas();renderIdeas();renderIdeaAlerts();
 }
@@ -819,7 +823,7 @@ function renderIdeaAlerts(){
     const diff=Math.ceil((new Date(x.deadline)-today)/(1000*60*60*24));
     const c=getColor(x.color);
     const urgentCls=diff<=2?'idea-alert-urgent':'';
-    const label=diff<0?'Quá hạn '+Math.abs(diff)+' ngày':diff===0?'Hôm nay':diff+' ngày nữa';
+    const label=diff<0?'Overdue '+Math.abs(diff)+'d':diff===0?'Today':diff+'d left';
     return`<div class="idea-alert-card">
       <div class="idea-alert-dot" style="background:${c.dot}"></div>
       <span class="idea-alert-name">${x.text}</span>
@@ -856,14 +860,14 @@ function renderIdeas(){
   const cpOpts=COLORS.map(col=>`<div class="idea-cp-opt${col.id===_ideaColorSel?' sel':''}" style="background:${col.dot}" data-cid="${col.id}" onclick="setIdeaColor('${col.id}')" title="${col.label}"></div>`).join('');
 
   const addHtml=`<div class="idea-input-wrap" style="margin-bottom:12px">
-    <div class="dnlbl" style="color:#C084FC">💡 Thêm ý tưởng mới</div>
+    <div class="dnlbl" style="color:#C084FC">💡 Add new idea</div>
     <div class="idea-row1" style="display:flex;gap:8px;align-items:center">
       <div class="idea-cpick-wrap">
-        <div class="idea-cpick-dot" id="idea-color-btn2" style="background:${c0.dot}" onclick="toggleIdeaCpick2(event)" title="Chọn màu"></div>
+        <div class="idea-cpick-dot" id="idea-color-btn2" style="background:${c0.dot}" onclick="toggleIdeaCpick2(event)" title="Pick color"></div>
         <div class="idea-cpick-menu" id="idea-cpick-menu2">${cpOpts.replace(/onclick="setIdeaColor/g,"onclick=\"setIdeaColor2")}</div>
       </div>
-      <input class="idea-text-inp" id="idea-text2" placeholder="Mô tả ý tưởng..." onkeydown="if(event.key==='Enter')addIdea2()" style="flex:1">
-      <label class="cb-wrap" title="Xác nhận thêm" onclick="addIdea2()" style="cursor:pointer;flex-shrink:0">
+      <input class="idea-text-inp" id="idea-text2" placeholder="Describe the idea..." onkeydown="if(event.key==='Enter')addIdea2()" style="flex:1">
+      <label class="cb-wrap" title="Add idea" onclick="addIdea2()" style="cursor:pointer;flex-shrink:0">
         <div class="cbb" id="idea-check-box2" style="border-color:rgba(192,132,252,.4)">
           <span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span>
         </div>
@@ -871,10 +875,10 @@ function renderIdeas(){
     </div>
   </div>`;
 
-  const _fLbl={all:'Tất cả',pending:'Chưa xong',done:'Hoàn thành',skip:'Bỏ qua'};
+  const _fLbl={all:'All',pending:'Pending',done:'Done',skip:'Skipped'};
   const filterHtml=`<div class="ideas-filter">
     ${['all','pending','done','skip'].map(f=>`<button class="ifbtn${_ideaFilter===f?' on':''}" onclick="_ideaFilter='${f}';renderIdeas()">${_fLbl[f]}</button>`).join('')}
-    <span style="margin-left:auto;font-size:11px;color:var(--text3);align-self:center">${IDEAS.filter(x=>x.status==='pending').length} đang chờ</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3);align-self:center">${IDEAS.filter(x=>x.status==='pending').length} pending</span>
   </div>`;
 
   const cardsHtml=filtered.length?filtered.map(x=>{
@@ -885,16 +889,16 @@ function renderIdeas(){
       const diff=Math.ceil((new Date(x.deadline)-today)/(1000*60*60*24));
       const bc=diff<0?'rgba(239,68,68,.15)':diff<=2?'rgba(245,158,11,.15)':'rgba(255,255,255,.06)';
       const tc=diff<0?'#F87171':diff<=2?'#FCD34D':c.tagText;
-      const lbl=diff<0?`Quá hạn ${Math.abs(diff)}n`:diff===0?'Hôm nay':`${diff} ngày`;
+      const lbl=diff<0?`Overdue ${Math.abs(diff)}d`:diff===0?'Today':`${diff}d`;
       deadBadge=`<span class="idea-date-badge" style="background:${bc};color:${tc};border-color:${tc}40">⏰ ${lbl}</span>`;
     }
     const actionBtns=x.status==='pending'
-      ?`<button class="iabtn done" onclick="markIdeaDone(${x.id})">✓ Xong</button><button class="iabtn skip" onclick="openIdeaSkip(${x.id})">✕ Bỏ</button>`
-      :`<button class="iabtn" onclick="undoIdeaStatus(${x.id})">↩ Khôi phục</button>`;
-    const skipNote=x.status==='skip'&&x.skip_reason?`<div class="idea-skip-reason">Lý do: ${x.skip_reason}</div>`:'';
+      ?`<button class="iabtn done" onclick="markIdeaDone(${x.id})">✓ Done</button><button class="iabtn skip" onclick="openIdeaSkip(${x.id})">✕ Skip</button>`
+      :`<button class="iabtn" onclick="undoIdeaStatus(${x.id})">↩ Restore</button>`;
+    const skipNote=x.status==='skip'&&x.skip_reason?`<div class="idea-skip-reason">Reason: ${x.skip_reason}</div>`:'';
     const datePicker=x.status==='pending'
       ?`<div style="display:flex;align-items:center;gap:6px;margin-top:7px">
-          <span style="font-size:10px;color:var(--text3)">Hoàn thành trước:</span>
+          <span style="font-size:10px;color:var(--text3)">Complete by:</span>
           <input type="date" class="idea-date-inp" style="width:140px;font-size:11px;padding:3px 8px" value="${x.deadline||''}" onchange="setIdeaDeadline(${x.id},this.value)">
           ${deadBadge}
         </div>`:'';
@@ -902,16 +906,16 @@ function renderIdeas(){
       <div class="idea-cdot" style="background:${c.dot}"></div>
       <div class="idea-body">
         <div class="idea-name ${x.status==='done'?'done-txt':''}" id="iname-${x.id}" onclick="editIdeaName(${x.id})">${x.text}</div>
-        <div class="idea-meta"><span class="idea-added-lbl">Thêm ${x.date_added}</span></div>
+        <div class="idea-meta"><span class="idea-added-lbl">Added ${x.date_added}</span></div>
         ${datePicker}${skipNote}
       </div>
       <div class="idea-actions">
         ${actionBtns}
-        <button class="iabtn" onclick="editIdeaName(${x.id})" title="Sửa">✏️</button>
-        <button class="iabtn" onclick="deleteIdea(${x.id})" title="Xóa" style="border-color:rgba(239,68,68,.2);color:#F87171">🗑</button>
+        <button class="iabtn" onclick="editIdeaName(${x.id})" title="Edit">✏️</button>
+        <button class="iabtn" onclick="deleteIdea(${x.id})" title="Delete" style="border-color:rgba(239,68,68,.2);color:#F87171">🗑</button>
       </div>
     </div>`;
-  }).join(''):'<div class="ideas-empty">Không có ý tưởng nào trong mục này.</div>';
+  }).join(''):'<div class="ideas-empty">No ideas in this view.</div>';
 
   panel.innerHTML=addHtml+filterHtml+'<div class="ideas-wrap">'+cardsHtml+'</div>';
 
@@ -953,13 +957,15 @@ function togglePom(){
 }
 function resetPom(){clearInterval(ptimer);pr=false;pd=false;ps=pt;pomUI();}
 const POM_QUOTES=[
-  '"Kỷ luật nhỏ, thực hành mỗi ngày."',
-  '"Động lực giúp bắt đầu. Thói quen giúp tiếp tục."',
-  '"Đừng mong việc dễ hơn — mong bản thân giỏi hơn."',
-  '"Hoặc bạn làm chủ ngày, hoặc ngày làm chủ bạn."',
-  '"Kỷ luật đau 1 lần. Hối tiếc đau cả đời."',
-  '"Tự học tạo ra của cải."',
-  '"Làm việc với bản thân chăm hơn ở công ty."',
+  '"Success is nothing more than a few simple disciplines, practiced every day."',
+  '"Motivation is what gets you started. Habit is what keeps you going."',
+  '"Don\'t wish it was easier; wish you were better."',
+  '"Either you run the day, or the day runs you."',
+  '"We must all suffer one of two things: the pain of discipline or the pain of regret."',
+  '"Formal education will make you a living; self-education will make you a fortune."',
+  '"Work harder on yourself than you do on your job."',
+  '"You are the average of the five people you spend the most time with."',
+  '"Don\'t join an easy crowd; you won\'t grow."',
 ];
 let _quoteIdx=Math.floor(Math.random()*POM_QUOTES.length);
 function initQuote(){
@@ -969,7 +975,7 @@ function initQuote(){
     const el=document.getElementById('pom-quote');if(!el)return;
     el.classList.add('fade');
     setTimeout(()=>{_quoteIdx=(_quoteIdx+1)%POM_QUOTES.length;el.textContent=POM_QUOTES[_quoteIdx];el.classList.remove('fade');},400);
-  },8000);
+  },60000);
 }
 
 function pomUI(){
@@ -988,11 +994,11 @@ function renderWeekStrip(){
   const d=NOW.getDay(),mon=new Date(NOW);mon.setDate(NOW.getDate()-((d+6)%7));
   const wdays=Array.from({length:7},(_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);return x;});
   const strip=document.getElementById('wstrip');
-  strip.innerHTML=`<div class="wstop"><div class="wstlbl">📅 ${VDL[DOW]}, ${NOW.getDate()}/${String(NOW.getMonth()+1).padStart(2,'0')}/${NOW.getFullYear()}</div><div class="wstsub">Tuần ${wkno(NOW)}</div></div><div class="wdays" id="wdg"></div>`;
+  strip.innerHTML=`<div class="wstop"><div class="wstlbl">📅 ${VDL[DOW]}, ${NOW.getDate()}/${String(NOW.getMonth()+1).padStart(2,'0')}/${NOW.getFullYear()}</div><div class="wstsub">Week ${wkno(NOW)}</div></div><div class="wdays" id="wdg"></div>`;
   const tot=TSCH.rows.length,g=strip.querySelector('#wdg');
-  const dn=['T2','T3','T4','T5','T6','T7','CN'];
+  const dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   wdays.forEach((day,i)=>{
-    const ds=dstr(day),isToday=ds===TODAY,done=Object.keys(ldck(ds)).filter(id=>parseInt(id)<200).length,pct=tot?Math.round(done/tot*100):0;
+    const ds=dstr(day),isToday=ds===TODAY;let pct=0;if(ds===TODAY){pct=todaySnapshot().pct;}else if(DAILY[ds]){pct=parseInt(DAILY[ds].pct)||0;}const done=pct>0?1:0;
     const dc=pct>=70?'hi':pct>=40?'mi':pct>0?'lo':'';
     const cell=document.createElement('div');
     cell.className='wday'+(isToday?' today':done>0?' has-data':'');
@@ -1004,17 +1010,37 @@ function renderWeekStrip(){
 // ── TRACKING ──
 const TTOT=TSCH.rows.length;
 function pc(p){return p>=80?'#10B981':p>=60?'#34D399':p>=40?'#F59E0B':'#EF4444';}
-function pst(p){if(!p)return '<span class="trkst sn">Không có</span>';if(p>=80)return '<span class="trkst sg">Xuất sắc</span>';if(p>=60)return '<span class="trkst sd">Tốt</span>';if(p>=40)return '<span class="trkst so">Trung bình</span>';return '<span class="trkst sl">Thấp</span>';}
+function pst(p){if(!p)return '<span class="trkst sn">None</span>';if(p>=80)return '<span class="trkst sg">Excellent</span>';if(p>=60)return '<span class="trkst sd">Good</span>';if(p>=40)return '<span class="trkst so">Medium</span>';return '<span class="trkst sl">Low</span>';}
+function ratingShort(p){return p>=80?'Exc':p>=60?'Good':p>=40?'Med':'Low';}
+function todaySnapshot(){
+  const total=TSCH.rows.length;let done=0,skipped=0;
+  TSCH.rows.forEach(r=>{if(CK[r.id])done++;else if(r.id in SK)skipped++;});
+  return{total,done,skipped,pct:total?Math.round(done/total*100):0};
+}
+async function pushProgress(){
+  const s=todaySnapshot();
+  DAILY[TODAY]={pct:s.pct,done:s.done,total:s.total};
+  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_progress',pw:AUTH_PW,date:TODAY,tasks_total:s.total,tasks_done:s.done,tasks_skipped:s.skipped,pct:s.pct})});}catch(e){}
+}
+async function loadDaily(){
+  try{
+    const res=await fetch(AS_URL+'?action=get_daily&pw='+encodeURIComponent(AUTH_PW));
+    const data=await res.json();
+    if(data.success&&data.days){
+      DAILY={};
+      data.days.forEach(d=>{if(d.date)DAILY[d.date]={pct:parseInt(String(d.pct_complete!=null&&d.pct_complete!==''?d.pct_complete:0))||0,done:Number(d.tasks_done)||0,total:Number(d.tasks_total)||0};});
+      if(document.getElementById('panel-track').classList.contains('active'))renderTracking();
+    }
+  }catch(e){}
+}
 function hist28(){
   const today=new Date();
-  const schedIds=new Set(TSCH.rows.map(r=>String(r.id)));
   return Array.from({length:28},(_,i)=>{
-    const d=new Date(today);
-    d.setDate(today.getDate()-(27-i));
-    const ds=dstr(d);
-    const done=Object.keys(ldck(ds)).filter(id=>schedIds.has(id)).length;
-    const pct=TTOT?Math.round(done/TTOT*100):0;
-    return{date:d,ds,done,pct,isToday:i===27};
+    const d=new Date(today);d.setDate(today.getDate()-(27-i));
+    const ds=dstr(d);let pct=0,done=0,total=0;
+    if(ds===TODAY){const s=todaySnapshot();pct=s.pct;done=s.done;total=s.total;}
+    else if(DAILY[ds]){pct=parseInt(DAILY[ds].pct)||0;done=DAILY[ds].done||0;total=DAILY[ds].total||0;}
+    return{date:d,ds,done,pct,total,isToday:i===27};
   });
 }
 function renderTracking(){
@@ -1023,34 +1049,34 @@ function renderTracking(){
   const act=h.filter(x=>x.pct>0),avg=act.length?Math.round(act.reduce((s,x)=>s+x.pct,0)/act.length):0;
   const p=document.getElementById('panel-track');
   p.innerHTML=`<div class="trkstats">
-    <div class="trkstat"><div class="trkval" style="color:#10B981">${td.pct}%</div><div class="trklab">Hôm nay</div></div>
+    <div class="trkstat"><div class="trkval" style="color:#10B981">${td.pct}%</div><div class="trklab">Today</div></div>
     <div class="trkstat"><div class="trkval" style="color:#F59E0B">${streak}</div><div class="trklab">🔥 Streak</div></div>
-    <div class="trkstat"><div class="trkval">${avg}%</div><div class="trklab">Trung bình</div></div>
-    <div class="trkstat"><div class="trkval">${act.length}</div><div class="trklab">Ngày có data</div></div>
+    <div class="trkstat"><div class="trkval">${avg}%</div><div class="trklab">Average</div></div>
+    <div class="trkstat"><div class="trkval">${act.length}</div><div class="trklab">Days tracked</div></div>
   </div>
-  <div class="trksec">4 tuần gần nhất</div>
+  <div class="trksec">Last 4 weeks</div>
   <div class="calgrid" id="cg"></div>
-  <div class="trkbar"><div class="trksec" style="margin:0">Lịch sử theo ngày</div>
+  <div class="trkbar"><div class="trksec" style="margin:0">Daily history</div>
     <button class="expbtn" onclick="exportCSV()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 9V1M3.5 6.5l3 3 3-3"/><path d="M1 10v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V10"/></svg>
-      Xuất CSV
+      Export CSV
     </button>
   </div>
-  <div class="trklist"><div class="trkrow trkh"><span>Ngày</span><span>Tiến độ</span><span style="text-align:right">%</span><span style="text-align:center">Đánh giá</span></div><div id="trk-body"></div></div>`;
-  const dw=['CN','T2','T3','T4','T5','T6','T7'],cg=p.querySelector('#cg');
+  <div class="trklist"><div class="trkrow trkh"><span>Date</span><span>Progress</span><span style="text-align:right">%</span><span style="text-align:center">Rating</span></div><div id="trk-body"></div></div>`;
+  const dw=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],cg=p.querySelector('#cg');
   dw.forEach(x=>{const el=document.createElement('div');el.className='calh';el.textContent=x;cg.appendChild(el);});
   const fd=h[0].date.getDay();for(let i=0;i<fd;i++)cg.appendChild(document.createElement('div'));
   h.forEach(day=>{
     const c=document.createElement('div');c.className='cald'+(day.pct>0?' has':'')+(day.isToday?' td':'');
     const bc=day.pct>0?pc(day.pct):undefined;
-    c.innerHTML=`<span class="calnum">${day.date.getDate()}</span><div class="calbar" style="${bc?`background:${bc};width:${day.pct}%`:''}"></div>${day.pct>0?`<div class="caltip">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1} — ${day.done}/${TTOT} (${day.pct}%)</div>`:''}`;
+    c.innerHTML=`<span class="calnum">${day.date.getDate()}</span><div class="calbar" style="${bc?`background:${bc};width:${day.pct}%`:''}"></div>${day.pct>0?`<span class="calpct" style="color:${bc}">${ratingShort(day.pct)} ${day.pct}%</span>`:''}${day.pct>0?`<div class="caltip">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1} — ${day.done}/${day.total||0} (${day.pct}%)</div>`:''}`;
     cg.appendChild(c);
   });
   const body=p.querySelector('#trk-body');
-  [...h].reverse().forEach(day=>{if(!day.pct&&!day.isToday)return;const r=document.createElement('div');r.className='trkrow';r.innerHTML=`<span class="trkdate">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1}${day.isToday?' <b>(hôm nay)</b>':''}</span><div><div class="trkpw"><div class="trkpf" style="width:${day.pct}%;background:${pc(day.pct)}"></div></div></div><span class="trkpn">${day.pct}%</span>${pst(day.pct)}`;body.appendChild(r);});
-  if(!body.children.length)body.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Bắt đầu tick checkbox để có dữ liệu.</div>';
+  [...h].reverse().forEach(day=>{if(!day.pct&&!day.isToday)return;const r=document.createElement('div');r.className='trkrow';r.innerHTML=`<span class="trkdate">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1}${day.isToday?' <b>(today)</b>':''}</span><div><div class="trkpw"><div class="trkpf" style="width:${day.pct}%;background:${pc(day.pct)}"></div></div></div><span class="trkpn">${day.pct}%</span>${pst(day.pct)}`;body.appendChild(r);});
+  if(!body.children.length)body.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Tick a checkbox to start tracking.</div>';
 }
-function exportCSV(){const rows=[['Ngày','Thứ','Done','Tổng','%']];hist28().filter(d=>d.done>0||d.isToday).forEach(d=>rows.push([d.ds,VDL[d.date.getDay()],d.done,TTOT,d.pct]));const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='tracking-'+TODAY+'.csv';a.click();}
+function exportCSV(){const rows=[['Date','Day','Done','Total','%']];hist28().filter(d=>d.done>0||d.isToday).forEach(d=>rows.push([d.ds,VDL[d.date.getDay()],d.done,d.total||0,d.pct]));const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='tracking-'+TODAY+'.csv';a.click();}
 
 // ── JIM ROHN ──
 function renderJim(){
@@ -1082,8 +1108,8 @@ function bootApp(){
 async function doLogin(){
   const inp=document.getElementById('auth-input'),btn=document.getElementById('auth-btn'),errEl=document.getElementById('auth-err');
   const pw=inp.value;
-  if(!pw){errEl.textContent='Nhập mật khẩu';return;}
-  btn.disabled=true;errEl.textContent='Đang kiểm tra...';
+  if(!pw){errEl.textContent='Enter password';return;}
+  btn.disabled=true;errEl.textContent='Checking...';
   try{
     const res=await fetch(AS_URL+'?action=login&pw='+encodeURIComponent(pw));
     const data=await res.json();
@@ -1091,8 +1117,8 @@ async function doLogin(){
       AUTH_PW=pw;localStorage.setItem('auth_pw',pw);
       document.getElementById('auth-gate').style.display='none';
       bootApp();
-    }else{errEl.textContent='Mật khẩu sai';btn.disabled=false;}
-  }catch(e){errEl.textContent='Lỗi kết nối — thử lại';btn.disabled=false;}
+    }else{errEl.textContent='Wrong password';btn.disabled=false;}
+  }catch(e){errEl.textContent='Connection error — try again';btn.disabled=false;}
 }
 function logout(){localStorage.removeItem('auth_pw');AUTH_PW='';location.reload();}
 async function initAuth(){
