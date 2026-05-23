@@ -550,7 +550,7 @@ async function loadTodayAuto(){
       pushProgress();
     }
     loadDaily();
-    fetchIdeasFromSheet(false);
+    fetchIdeasFromSheet(true);
     sdot('ok');
   }catch(e){sdot(Object.keys(CK).length>0?'ok':'err');}
 }
