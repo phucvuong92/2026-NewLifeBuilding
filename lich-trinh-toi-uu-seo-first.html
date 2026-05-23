@@ -503,6 +503,22 @@ async function logTask(row,status,reason=''){
   catch(e){sdot('err');}
 }
 
+function catColor(cat){const c=COLORS.find(x=>x.label===cat);return c?c.id:'gray';}
+function applySheetTasks(tasks,reset){
+  if(reset){CK={};SK={};TSCH.rows=TSCH.rows.filter(r=>!r.custom);}
+  (tasks||[]).forEach(t=>{
+    const id=parseInt(t.task_id);
+    if(!TSCH.rows.some(r=>r.id===id)){
+      TSCH.rows.push({id:id,time:t.scheduled_time||'',task:t.task_name||'(task)',color:catColor(t.category),section:'Tự thêm',custom:true});
+      if(id>=idCnt)idCnt=id;
+    }
+    if(t.status==='done'){CK[id]=true;delete SK[id];}
+    else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];}
+    else{delete CK[id];delete SK[id];}
+  });
+  svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+}
+
 async function syncDown(){
   const btn=document.getElementById('btn-sy'),orig=btn.innerHTML;
   btn.disabled=true;btn.innerHTML='↻ Đang sync...';sdot('loading');
@@ -510,11 +526,14 @@ async function syncDown(){
     const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
     if(data.success&&data.tasks&&data.tasks.length>0){
-      CK={};SK={};
-      data.tasks.forEach(t=>{const id=parseInt(t.task_id);if(t.status==='done')CK[id]=true;else if(t.status==='skip')SK[id]=t.skip_reason||'';});
-      svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+      applySheetTasks(data.tasks,true);
       sdot('ok');btn.innerHTML='✓ Sync xong ('+data.tasks.length+' task)';
-    }else{sdot('ok');btn.innerHTML='Sheet chưa có data hôm nay';}
+    }else if(data.success){
+      applySheetTasks([],true);
+      sdot('ok');btn.innerHTML='Sheet chưa có data hôm nay';
+    }else{
+      sdot('err');btn.innerHTML=data.error==='unauthorized'?'✗ Sai mật khẩu':'✗ Lỗi';
+    }
   }catch(e){sdot('err');btn.innerHTML='✗ Lỗi kết nối';}
   setTimeout(()=>{btn.disabled=false;btn.innerHTML=orig;},3000);
 }
@@ -524,9 +543,8 @@ async function loadTodayAuto(){
   try{
     const res=await fetch(AS_URL+'?action=get_today&date='+TODAY+'&pw='+encodeURIComponent(AUTH_PW));
     const data=await res.json();
-    if(data.success&&data.tasks&&data.tasks.length>0){
-      data.tasks.forEach(t=>{const id=parseInt(t.task_id);if(t.status==='done'){CK[id]=true;delete SK[id];}else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];}});
-      svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+    if(data.success&&data.tasks){
+      applySheetTasks(data.tasks,false);
     }
     sdot('ok');
   }catch(e){sdot(Object.keys(CK).length>0?'ok':'err');}
