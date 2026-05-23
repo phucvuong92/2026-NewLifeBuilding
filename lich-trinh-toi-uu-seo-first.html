@@ -499,7 +499,7 @@ function sdot(s){const d=document.getElementById('sdot');d.className='sync-dot '
 function updateProg(){
   const rows=TSCH.rows;const done=rows.filter(r=>CK[r.id]).length;
   const pct=rows.length?Math.round(done/rows.length*100):0;
-  document.getElementById('plbl').textContent=done+' / '+rows.length+' task hôm nay ('+pct+'%)';
+  document.getElementById('plbl').textContent=done+' / '+rows.length+' tasks today ('+pct+'%)';
   const circ=188.5;
   const ring=document.getElementById('prog-ring');
   const lbl=document.getElementById('prog-pct');
@@ -641,7 +641,7 @@ function makeRow(row){
     <div class="tagcell"><span class="tag" style="background:${c.tag};color:${c.tagText}" onclick="openCP(event,${row.id})">${c.label}</span></div>
     <div class="chkcell"><label class="cbw"><input type="checkbox" ${isDone?'checked':''} onchange="toggleCheck(${row.id},this)">
     <div class="cbb"><span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span></div></label></div>
-    <div class="skipcell"><button class="skipbtn ${isSkip?'on':''}" onclick="openSkip(${row.id})" title="Skip với lý do">✕</button></div>
+    <div class="skipcell"><button class="skipbtn ${isSkip?'on':''}" onclick="openSkip(${row.id})" title="Skip with reason">✕</button></div>
     <div class="delcell"><button class="delbtn" onclick="deleteRow(${row.id})">×</button></div>
     <div class="cpick" id="cp-${row.id}"></div>`;
   const cp=r.querySelector('.cpick');
