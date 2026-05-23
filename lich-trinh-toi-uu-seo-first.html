@@ -143,6 +143,8 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 .row:hover{background:var(--row-hover)}
 .row.done-row{opacity:.4}
 .row.skip-row{background:rgba(245,158,11,.04)}
+.row.doing-row{background:rgba(96,165,250,.06);box-shadow:inset 3px 0 0 #60A5FA}
+.row.doing-row:hover{background:rgba(96,165,250,.09)}
 .row.hl-row{background:rgba(16,185,129,.05)}.row.hl-row:hover{background:rgba(16,185,129,.08)}
 .row.dragging{opacity:.35;background:var(--drag-bg)}
 .row.drag-over{background:rgba(16,185,129,.08);border-top:2px solid var(--accent)}
@@ -156,6 +158,9 @@ body{font-family:var(--font);background:transparent;color:var(--text);min-height
 .taskcell{padding:7px 6px;display:flex;align-items:flex-start;gap:7px}
 .cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;cursor:pointer;transition:transform .15s;margin-top:4px}
 .cdot:hover{transform:scale(1.4)}
+.cdot.doing{animation:dotPulse 2.4s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(96,165,250,.55)}50%{box-shadow:0 0 0 5px rgba(96,165,250,0)}}
+@media(prefers-reduced-motion:reduce){.cdot.doing{animation:none;box-shadow:0 0 0 2px rgba(96,165,250,.5)}}
 .ttxt{font-size:13px;color:var(--text);flex:1;cursor:text;line-height:1.45}
 .tinpt{font-family:var(--font);font-size:13px;color:var(--text);background:transparent;border:none;outline:none;width:100%;line-height:1.45}
 .skip-badge{font-size:10px;color:#FCD34D;background:rgba(245,158,11,.1);padding:1px 7px;border-radius:8px;margin-top:3px;display:inline-block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid rgba(245,158,11,.15)}
@@ -481,6 +486,11 @@ function svCk(o){try{localStorage.setItem(CKK,JSON.stringify(o))}catch{}}
 function ldSk(){try{return JSON.parse(localStorage.getItem(SKK)||'{}')}catch{return{}}}
 function svSk(o){try{localStorage.setItem(SKK,JSON.stringify(o))}catch{}}
 let CK=ldCk(),SK=ldSk();
+// ★ MỚI: trạng thái "đang xử lý" — chỉ 1 task tại một thời điểm. Lưu id (chuỗi) hoặc rỗng.
+const DGK='dg_'+TODAY;
+function ldDg(){try{return localStorage.getItem(DGK)||''}catch{return''}}
+function svDg(v){try{if(v)localStorage.setItem(DGK,v);else localStorage.removeItem(DGK)}catch{}}
+let DOING=ldDg();
 
 function getColor(id){return COLORS.find(c=>c.id===id)||COLORS[6];}
 
@@ -507,18 +517,19 @@ async function logTask(row,status,reason=''){
 
 function catColor(cat){const c=COLORS.find(x=>x.label===cat);return c?c.id:'gray';}
 function applySheetTasks(tasks,reset){
-  if(reset){CK={};SK={};TSCH.rows=TSCH.rows.filter(r=>!r.custom);}
+  if(reset){CK={};SK={};DOING='';TSCH.rows=TSCH.rows.filter(r=>!r.custom);}
   (tasks||[]).forEach(t=>{
     const id=parseInt(t.task_id);
     if(!TSCH.rows.some(r=>r.id===id)){
       TSCH.rows.push({id:id,time:t.scheduled_time||'',task:t.task_name||'(task)',color:catColor(t.category),section:'Added',custom:true});
       if(id>=idCnt)idCnt=id;
     }
-    if(t.status==='done'){CK[id]=true;delete SK[id];}
-    else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];}
-    else{delete CK[id];delete SK[id];}
+    if(t.status==='done'){CK[id]=true;delete SK[id];if(DOING===String(id))DOING='';}
+    else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];if(DOING===String(id))DOING='';}
+    else if(t.status==='doing'){DOING=String(id);delete CK[id];delete SK[id];}
+    else{delete CK[id];delete SK[id];if(DOING===String(id))DOING='';}
   });
-  svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+  svCk(CK);svSk(SK);svDg(DOING);renderToday();updateProg();renderWeekStrip();
 }
 
 async function syncDown(){
@@ -613,15 +624,15 @@ function renderToday(){
 
 function makeRow(row){
   const r=document.createElement('div');
-  const isDone=!!CK[row.id],isSkip=row.id in SK;
-  r.className='row'+(isDone?' done-row':isSkip?' skip-row':'')+(row.hl?' hl-row':'');
+  const isDone=!!CK[row.id],isSkip=row.id in SK,isDoing=DOING===String(row.id)&&!isDone&&!isSkip;
+  r.className='row'+(isDone?' done-row':isSkip?' skip-row':isDoing?' doing-row':'')+(row.hl?' hl-row':'');
   r.dataset.id=row.id;r.draggable=true;
   const c=getColor(row.color);
   r.innerHTML=`
     <div class="dh"><div class="dhd"><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
     <div class="tcell" id="tc-${row.id}" onclick="editTime(${row.id})">${row.time}</div>
     <div class="taskcell">
-      <div class="cdot" style="background:${c.dot}" onclick="openCP(event,${row.id})"></div>
+      <div class="cdot${isDoing?' doing':''}" style="background:${c.dot}" onclick="toggleDoing(event,${row.id})" title="Tap: mark in-progress / stop"></div>
       <div style="flex:1">
         <span class="ttxt" id="tt-${row.id}" onclick="editTask(${row.id})">${row.task}</span>
         ${isSkip?`<div><span class="skip-badge" title="${SK[row.id]||''}">⚠ ${SK[row.id]||'Skipped'}</span></div>`:''}
@@ -653,14 +664,33 @@ function makeRow(row){
 }
 
 function toggleCheck(id,el){
-  if(el.checked){CK[id]=true;delete SK[id];}else{delete CK[id];}
+  if(el.checked){CK[id]=true;delete SK[id];if(DOING===String(id)){DOING='';svDg('');}}else{delete CK[id];}
   svCk(CK);svSk(SK);
   const row=TSCH.rows.find(r=>r.id===id);if(row)logTask(row,el.checked?'done':'miss');
   updateRowVis(id);updateProg();renderWeekStrip();pushProgress();
 }
+// ★ MỚI: bật/tắt "đang xử lý". Chỉ 1 task tại một thời điểm — bật task mới thì task cũ tự về trống.
+function toggleDoing(e,id){
+  e.stopPropagation();
+  const sid=String(id);
+  if(DOING===sid){
+    DOING='';svDg('');
+    const row=TSCH.rows.find(r=>r.id===id);if(row)logTask(row,'miss');
+  }else{
+    const prev=DOING;
+    DOING=sid;svDg(sid);
+    delete CK[id];delete SK[id];svCk(CK);svSk(SK); // đang-làm loại trừ done/skip
+    const row=TSCH.rows.find(r=>r.id===id);if(row)logTask(row,'doing');
+    if(prev&&prev!==sid){const prow=TSCH.rows.find(r=>String(r.id)===prev);if(prow)logTask(prow,'miss');}
+  }
+  renderToday();updateProg();renderWeekStrip();pushProgress();
+}
 function updateRowVis(id){
   const r=document.querySelector(`.row[data-id="${id}"]`);if(!r)return;
+  const isDoing=DOING===String(id)&&!CK[id]&&!(id in SK);
   r.classList.toggle('done-row',!!CK[id]);r.classList.toggle('skip-row',id in SK);
+  r.classList.toggle('doing-row',isDoing);
+  const dot=r.querySelector('.cdot');if(dot)dot.classList.toggle('doing',isDoing);
   const sb=r.querySelector('.skipbtn');if(sb)sb.className='skipbtn'+(id in SK?' on':'');
   const tc=r.querySelector('.taskcell > div');
   if(tc){let b=tc.querySelector('.skip-badge');if(id in SK){if(!b){b=document.createElement('div');tc.appendChild(b);}b.innerHTML=`<span class="skip-badge" title="${SK[id]||''}">⚠ ${SK[id]||'Skipped'}</span>`;}else if(b)b.remove();}
@@ -678,7 +708,7 @@ function openSkip(id){
 function closeSkip(){document.getElementById('skip-modal').classList.remove('open');_sid=null;}
 function confirmSkip(){
   if(!_sid)return;const reason=document.getElementById('modal-reason').value.trim();
-  SK[_sid]=reason;delete CK[_sid];svCk(CK);svSk(SK);
+  SK[_sid]=reason;delete CK[_sid];if(DOING===String(_sid)){DOING='';svDg('');}svCk(CK);svSk(SK);
   const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'skip',reason);
   updateRowVis(_sid);updateProg();renderWeekStrip();pushProgress();closeSkip();
 }
