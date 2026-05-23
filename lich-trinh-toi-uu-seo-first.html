@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch trình cá nhân</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1923;
+  --bg2:#111827;
+  --card:#1A2332;
+  --card2:#1F2937;
+  --border:rgba(255,255,255,.07);
+  --border2:rgba(255,255,255,.12);
+  --border3:rgba(255,255,255,.18);
+  --text:#F9FAFB;
+  --text2:#9CA3AF;
+  --text3:#6B7280;
+  --accent:#10B981;
+  --accent2:#34D399;
+  --accent-dim:rgba(16,185,129,.15);
+  --accent-glow:rgba(16,185,129,.25);
+  --row-hover:rgba(255,255,255,.025);
+  --drag-bg:rgba(255,255,255,.05);
+  --font:'DM Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+  --r:10px;--rlg:14px;
+}
+html{min-height:100%;background:linear-gradient(165deg,#0B1422 0%,#0F1A2E 50%,#0C1727 100%);background-attachment:fixed}
+html::before,html::after{content:'';position:fixed;inset:-25%;z-index:-1;pointer-events:none;will-change:transform,opacity;filter:blur(8px)}
+html::before{
+  background:
+    radial-gradient(38% 42% at 22% 24%, rgba(52,211,153,.22), transparent 70%),
+    radial-gradient(42% 46% at 80% 30%, rgba(129,140,248,.20), transparent 72%);
+  animation:auroraA 26s ease-in-out infinite}
+html::after{
+  background:
+    radial-gradient(40% 44% at 28% 82%, rgba(96,165,250,.18), transparent 72%),
+    radial-gradient(40% 46% at 78% 76%, rgba(244,160,190,.16), transparent 72%);
+  animation:auroraB 33s ease-in-out infinite}
+@keyframes auroraA{0%{transform:translate3d(0,0,0) scale(1);opacity:.9}50%{transform:translate3d(4%,3%,0) scale(1.1);opacity:1}100%{transform:translate3d(0,0,0) scale(1);opacity:.9}}
+@keyframes auroraB{0%{transform:translate3d(0,0,0) scale(1.06);opacity:1}50%{transform:translate3d(-4%,-3%,0) scale(1);opacity:.85}100%{transform:translate3d(0,0,0) scale(1.06);opacity:1}}
+@media(prefers-reduced-motion:reduce){html::before,html::after{animation:none}}
+body{font-family:var(--font);background:transparent;color:var(--text);min-height:100vh;padding:20px 18px 60px;max-width:900px;margin:0 auto}
+
+/* ── MODAL ── */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.moverlay.open{opacity:1;pointer-events:all}
+.modal{background:#1A2332;border:1px solid var(--border2);border-radius:16px;padding:24px 26px;width:390px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.mtitle{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
+.msub{font-size:12px;color:var(--text2);margin-bottom:13px;line-height:1.5}
+.mtask{font-size:12px;font-weight:500;color:var(--accent2);background:var(--accent-dim);border-radius:7px;padding:8px 11px;margin-bottom:12px;border:1px solid rgba(52,211,153,.15)}
+.modal textarea{width:100%;border:1px solid var(--border2);border-radius:9px;padding:10px 12px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg2);resize:none;outline:none;height:80px;transition:border-color .15s}
+.modal textarea:focus{border-color:var(--accent)}
+.macts{display:flex;gap:7px;margin-top:12px;justify-content:flex-end}
+.mbtn{padding:8px 16px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s}
+.mbtn:hover{background:var(--drag-bg);color:var(--text)}
+.mbtn.ok{background:var(--accent);color:#fff;border-color:var(--accent)}.mbtn.ok:hover{background:#0EA572}
+.mbtn.un{border-color:rgba(239,68,68,.4);color:#F87171}.mbtn.un:hover{background:rgba(239,68,68,.1)}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:stretch;gap:14px;margin-bottom:14px;flex-direction:row-reverse}
+.hdr-left{flex:0 0 34%;min-width:0;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#091A12 0%,#0D2318 45%,#111827 100%);border:1px solid rgba(16,185,129,.15);border-radius:14px;padding:16px 18px}
+.hdr-title{font-size:18px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.hdr-sub{font-size:11px;color:var(--text3);line-height:1.5}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:background .3s;flex-shrink:0}
+.sync-dot.ok{background:var(--accent)}.sync-dot.err{background:#EF4444}
+.sync-dot.loading{background:#F59E0B;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.prog-track{height:3px;background:rgba(255,255,255,.06);border-radius:2px;width:100%;overflow:hidden;margin-top:10px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s}
+.prog-lbl{font-size:11px;color:var(--text3);margin-top:5px}
+.sheet-btns{display:flex;gap:6px;margin-top:10px}
+.sbt{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;border:1px solid;transition:all .18s}
+.sbt.sy{background:var(--accent-dim);color:var(--accent2);border-color:rgba(52,211,153,.2)}.sbt.sy:hover{background:rgba(16,185,129,.22)}
+.sbt:disabled{opacity:.4;cursor:not-allowed}
+.sbt svg{width:12px;height:12px;flex-shrink:0}
+
+/* ── POMODORO ── */
+.pom{flex:1;background:linear-gradient(145deg,#091A12 0%,#0D2318 45%,#111827 100%);border:1px solid rgba(16,185,129,.15);border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.pom-modes{display:flex;gap:5px}
+.pmode{padding:5px 13px;border:1.5px solid rgba(255,255,255,.15);background:transparent;border-radius:20px;font-family:var(--font);font-size:11px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;transition:all .18s}
+.pmode.active{background:#10B981;color:#fff;border-color:#10B981}
+.pmode:hover:not(.active){background:rgba(255,255,255,.07);color:rgba(255,255,255,.7)}
+.pom-bigtime{font-size:50px;font-weight:300;font-family:var(--mono);color:#F9FAFB;letter-spacing:-2px;line-height:1;text-shadow:0 0 30px rgba(16,185,129,.2)}
+.pom-controls{display:flex;align-items:center;gap:8px}
+.pom-start-btn{padding:9px 32px;background:#10B981;color:#fff;border-radius:24px;border:none;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;letter-spacing:.2px}
+.pom-start-btn:hover{background:#0EA572}
+.pom-reset-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pom-reset-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+.pom-quote{font-size:11px;color:rgba(255,255,255,.75);font-style:italic;line-height:1.4;min-height:14px;transition:opacity .4s;width:100%;text-align:center}
+.pom-quote.fade{opacity:0}
+.pom-mini-stats{font-size:10px;color:rgba(255,255,255,.3);margin-top:-4px}
+.pom-sub{display:flex;gap:5px;margin-top:-4px}
+.psub{padding:3px 12px;border:1px solid rgba(255,255,255,.12);background:transparent;border-radius:14px;font-family:var(--font);font-size:11px;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s}
+.psub.active{background:rgba(16,185,129,.2);color:#34D399;border-color:rgba(16,185,129,.3)}
+.psub:hover:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+
+/* ── WEEK STRIP ── */
+.wstrip{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:12px}
+.wstop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.wstlbl{font-size:13px;font-weight:500;color:var(--text)}
+.wstsub{font-size:11px;color:var(--text3)}
+.wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wday{display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:9px;padding:7px 2px;border:1px solid transparent;transition:all .15s}
+.wday.today{background:var(--accent-dim);border-color:var(--accent-glow)}
+.wday.has-data{border-color:var(--border2)}
+.wdn{font-size:9px;font-weight:600;letter-spacing:.5px;color:var(--text3);text-transform:uppercase}
+.wdd{font-size:14px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1}
+.wds{font-size:9px;color:var(--text3)}
+.wday.today .wdn,.wday.today .wdd,.wday.today .wds{color:var(--accent2)}
+.wddot{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:2px}
+.wddot.hi{background:var(--accent)}.wddot.mi{background:#F59E0B}.wddot.lo{background:#EF4444}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab{padding:10px 18px;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--text2)}.tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+
+/* ── NOTICE ── */
+.notice{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.18);border-radius:var(--r);padding:9px 13px;margin-bottom:12px;font-size:12px;color:var(--accent2);display:flex;align-items:flex-start;gap:7px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── TOOLBAR ── */
+.tbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.dchip{font-size:12px;font-weight:500;background:var(--accent-dim);color:var(--accent2);padding:4px 12px;border-radius:20px;border:1px solid rgba(52,211,153,.15)}
+.lchip{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-left:5px}
+.lc-p{background:rgba(129,140,248,.12);color:#A5B4FC;border:1px solid rgba(129,140,248,.2)}
+.lc-a{background:rgba(245,158,11,.1);color:#FCD34D;border:1px solid rgba(245,158,11,.2)}
+.lc-k{background:rgba(244,114,182,.1);color:#F9A8D4;border:1px solid rgba(244,114,182,.2)}
+.addbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border2);background:transparent;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+.addbtn:hover{background:var(--drag-bg);color:var(--text)}
+
+/* ── TABLE ── */
+.sched{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.colh{display:grid;grid-template-columns:26px 104px 1fr auto 42px 30px 26px;padding:7px 0;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.colh span{font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);padding:0 5px}
+.sec-hdr{background:rgba(255,255,255,.02);padding:5px 12px 5px 26px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border)}
+.row{display:grid;grid-template-columns:26px 104px 1fr auto 42px 30px 26px;align-items:center;border-bottom:1px solid var(--border);min-height:50px;transition:background .12s;position:relative}
+.row:last-child{border-bottom:none}
+.row:hover{background:var(--row-hover)}
+.row.done-row{opacity:.4}
+.row.skip-row{background:rgba(245,158,11,.04)}
+.row.hl-row{background:rgba(16,185,129,.05)}.row.hl-row:hover{background:rgba(16,185,129,.08)}
+.row.dragging{opacity:.35;background:var(--drag-bg)}
+.row.drag-over{background:rgba(16,185,129,.08);border-top:2px solid var(--accent)}
+.dh{display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--text3);padding:0 4px;height:100%;touch-action:none;opacity:.4}
+.dh:active{cursor:grabbing}
+.dhd{display:grid;grid-template-columns:1fr 1fr;gap:2.5px;width:10px}
+.dhd span{width:2.5px;height:2.5px;background:currentColor;border-radius:50%}
+.tcell{padding:0 6px 0 2px;font-family:var(--mono);font-size:11px;color:var(--text3);cursor:text}
+.tinp{font-family:var(--mono);font-size:11px;color:var(--text);background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:3px 6px;width:94px;outline:none}
+.tinp:focus{border-color:var(--accent)}
+.taskcell{padding:7px 6px;display:flex;align-items:flex-start;gap:7px}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;cursor:pointer;transition:transform .15s;margin-top:4px}
+.cdot:hover{transform:scale(1.4)}
+.ttxt{font-size:13px;color:var(--text);flex:1;cursor:text;line-height:1.45}
+.tinpt{font-family:var(--font);font-size:13px;color:var(--text);background:transparent;border:none;outline:none;width:100%;line-height:1.45}
+.skip-badge{font-size:10px;color:#FCD34D;background:rgba(245,158,11,.1);padding:1px 7px;border-radius:8px;margin-top:3px;display:inline-block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid rgba(245,158,11,.15)}
+.tagcell{padding:0 5px}
+.tag{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap;cursor:pointer;display:block;opacity:.85}
+.tag:hover{opacity:1}
+.chkcell{display:flex;align-items:center;justify-content:center}
+.cbw{position:relative;width:22px;height:22px;cursor:pointer}
+.cbw input{position:absolute;opacity:0;width:0;height:0}
+.cbb{width:22px;height:22px;border:1.5px solid var(--border2);border-radius:6px;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.cbw input:checked ~ .cbb{background:var(--accent);border-color:var(--accent)}
+.cbch{opacity:0;transition:opacity .15s}
+.cbw input:checked ~ .cbb .cbch{opacity:1}
+.cbch svg{width:13px;height:13px;stroke:#fff;stroke-width:2.5;fill:none;display:block}
+.skipcell{display:flex;align-items:center;justify-content:center}
+.skipbtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.skipbtn:hover,.skipbtn.on{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3);color:#F59E0B}
+.delcell{display:flex;align-items:center;justify-content:center;padding-right:3px}
+.delbtn{width:20px;height:20px;border-radius:50%;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;opacity:0;line-height:1}
+.row:hover .delbtn{opacity:1}.delbtn:hover{background:rgba(239,68,68,.15);color:#F87171}
+.cpick{position:absolute;z-index:200;background:#1A2332;border:1px solid var(--border2);border-radius:11px;padding:9px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;flex-wrap:wrap;gap:7px;width:146px;top:50%;left:34px;transform:translateY(-50%)}
+.cpick.open{display:flex}
+.cpdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.cpdot:hover{transform:scale(1.18)}.cpdot.sel{border-color:var(--text)}
+
+/* ── DAY NOTE ── */
+.dnwrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:12px}
+.dnlbl{font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.dnrow{display:flex;gap:7px}
+.dninp{flex:1;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
+.dninp:focus{border-color:var(--accent)}
+.dninp::placeholder{color:var(--text3)}
+.dnbtn{padding:8px 14px;border:1px solid var(--border2);background:transparent;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.dnbtn:hover{background:var(--drag-bg);color:var(--text)}
+
+/* ── TRACKING ── */
+.trkstats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
+.trkstat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center}
+.trkval{font-size:22px;font-weight:500;color:var(--text);line-height:1}
+.trklab{font-size:11px;color:var(--text3);margin-top:3px}
+.trksec{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:0 0 9px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px}
+.calh{font-size:10px;font-weight:600;text-align:center;color:var(--text3);padding:3px 0}
+.cald{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;border:1px solid transparent;transition:border-color .1s}
+.cald.has{border-color:var(--border2);cursor:pointer}.cald.td{border-color:var(--accent)!important;background:var(--accent-dim)}
+.cald.has:hover .caltip{display:block}
+.calnum{font-size:10px;color:var(--text3);line-height:1;font-variant-numeric:tabular-nums}
+.cald.td .calnum{color:var(--accent2)}
+.calbar{width:65%;height:4px;border-radius:2px;background:var(--border)}
+.caltip{display:none;position:absolute;bottom:calc(100%+5px);left:50%;transform:translateX(-50%);background:#1A2332;border:1px solid var(--border2);color:var(--text);font-size:11px;padding:5px 9px;border-radius:6px;white-space:nowrap;z-index:50;pointer-events:none}
+.trklist{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.trkrow{display:grid;grid-template-columns:100px 1fr 52px 76px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
+.trkrow:last-child{border-bottom:none}
+.trkrow.trkh{background:rgba(255,255,255,.02);font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);padding:7px 14px}
+.trkdate{color:var(--text2);font-variant-numeric:tabular-nums}
+.trkpw{background:rgba(255,255,255,.06);border-radius:3px;height:5px;overflow:hidden}
+.trkpf{height:100%;border-radius:3px}
+.trkpn{color:var(--text);font-weight:500;text-align:right}
+.trkst{font-size:10px;padding:2px 7px;border-radius:10px;text-align:center;white-space:nowrap}
+.sg{background:rgba(16,185,129,.15);color:#34D399}.sd{background:rgba(52,211,153,.1);color:#6EE7B7}
+.so{background:rgba(245,158,11,.1);color:#FCD34D}.sl{background:rgba(239,68,68,.1);color:#FCA5A5}
+.sn{background:rgba(255,255,255,.05);color:var(--text3)}
+.trkbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.expbtn{display:flex;align-items:center;gap:4px;padding:6px 12px;border:1px solid var(--border2);background:transparent;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+.expbtn:hover{background:var(--drag-bg);color:var(--text)}
+
+/* ── JIM ROHN ── */
+.jimintro{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.jimq{font-size:15px;font-weight:500;color:var(--accent2);line-height:1.55;margin-bottom:5px}
+.jims{font-size:12px;color:var(--text3)}
+.jimgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.jimgrid{grid-template-columns:1fr}}
+.jimc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;border-left:3px solid}
+.jimn{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.jimv{font-size:13px;font-weight:500;color:var(--text);line-height:1.45;margin-bottom:5px}
+.jime{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:7px;line-height:1.4}
+.jima{font-size:11px;color:var(--text2);background:rgba(255,255,255,.03);border-radius:6px;padding:7px 10px;line-height:1.5}
+.jima strong{color:var(--accent2);font-weight:500}
+
+/* ── IDEAS ── */
+.idea-input-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:10px}
+.idea-row1{display:flex;gap:7px;margin-bottom:8px}
+.idea-row2{display:flex;gap:7px;align-items:center}
+.idea-text-inp{flex:1;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg2);outline:none;transition:border-color .15s}
+.idea-text-inp:focus{border-color:#C084FC}
+.idea-text-inp::placeholder{color:var(--text3)}
+.idea-date-inp{border:1px solid var(--border2);border-radius:8px;padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--text2);background:var(--bg2);outline:none;cursor:pointer;transition:border-color .15s;width:150px}
+.idea-date-inp:focus{border-color:#C084FC}
+.idea-add-btn{padding:8px 16px;background:#C084FC;color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.idea-add-btn:hover{background:#A855F7}
+.idea-cpick-wrap{position:relative}
+.idea-cpick-dot{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid rgba(255,255,255,.2);transition:transform .15s;flex-shrink:0}
+.idea-cpick-dot:hover{transform:scale(1.1)}
+.idea-cpick-menu{position:absolute;top:calc(100%+6px);left:0;background:#1A2332;border:1px solid var(--border2);border-radius:10px;padding:9px;display:none;flex-wrap:wrap;gap:6px;width:152px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.idea-cpick-menu.open{display:flex}
+.idea-cp-opt{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.idea-cp-opt:hover{transform:scale(1.2)}.idea-cp-opt.sel{border-color:#fff}
+.idea-alerts{margin-top:10px}
+.idea-alert-card{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.2);border-radius:8px;padding:9px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px;font-size:12px}
+.idea-alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.idea-alert-name{flex:1;color:var(--text);font-weight:500}
+.idea-alert-dead{font-size:11px;color:#F9A8D4;white-space:nowrap}
+.idea-alert-urgent{color:#F87171}
+.ideas-wrap{display:flex;flex-direction:column;gap:8px}
+.idea-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;transition:opacity .2s}
+.idea-card.done-idea{opacity:.38}
+.idea-card.skip-idea{opacity:.38}
+.idea-cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.idea-body{flex:1;min-width:0}
+.idea-name{font-size:13px;color:var(--text);line-height:1.4;margin-bottom:5px}
+.idea-name.done-txt{text-decoration:line-through;color:var(--text3)}
+.idea-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.idea-date-badge{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid}
+.idea-skip-reason{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic}
+.idea-actions{display:flex;gap:5px;flex-shrink:0}
+.iabtn{font-size:11px;padding:4px 10px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.iabtn:hover{background:var(--drag-bg);color:var(--text)}
+.iabtn.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:#34D399}
+.iabtn.skip{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#F87171}
+.ideas-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.ifbtn{font-size:11px;font-weight:500;padding:5px 13px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font);transition:all .15s}
+.ifbtn.on{background:#C084FC;color:#fff;border-color:#C084FC}
+.ifbtn:hover:not(.on){background:var(--drag-bg);color:var(--text)}
+.ideas-empty{text-align:center;color:var(--text3);font-size:13px;padding:32px 0}
+.idea-added-lbl{font-size:10px;color:var(--text3);flex-shrink:0;white-space:nowrap}
+
+@keyframes flashDone{0%,100%{background:var(--card)}50%{background:rgba(16,185,129,.12)}}
+.pdone{animation:flashDone .6s ease 3}
+</style>
+</head>
+<body>
+
+<div class="moverlay" id="idea-skip-modal">
+  <div class="modal">
+    <div class="mtitle">Bỏ qua ý tưởng này</div>
+    <div class="msub">Ghi lý do để sau này nhìn lại biết tại sao không làm.</div>
+    <div class="mtask" id="idea-modal-name"></div>
+    <textarea id="idea-modal-reason" placeholder="Ví dụ: Không đủ nguồn lực, đã có tool tương tự, ưu tiên thấp hơn..."></textarea>
+    <div class="macts">
+      <button class="mbtn" onclick="closeIdeaSkip()">Huỷ</button>
+      <button class="mbtn ok" onclick="confirmIdeaSkip()">Xác nhận bỏ qua</button>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="skip-modal">
+  <div class="modal">
+    <div class="mtitle">Bỏ qua task này</div>
+    <div class="msub">Ghi lý do để Claude phân tích pattern theo tuần.</div>
+    <div class="mtask" id="modal-task"></div>
+    <textarea id="modal-reason" placeholder="Ví dụ: Mệt sau họp, coaching kéo dài, có việc gấp..."></textarea>
+    <div class="macts">
+      <button class="mbtn" onclick="closeSkip()">Huỷ</button>
+      <button class="mbtn un" id="mbtn-undo" style="display:none" onclick="undoSkip()">↩ Bỏ skip</button>
+      <button class="mbtn ok" onclick="confirmSkip()">Xác nhận skip</button>
+    </div>
+  </div>
+</div>
+
+<div class="hdr" >
+  <div class="hdr-left">
+    <div>
+      <div class="hdr-title">Lịch trình <span class="sync-dot" id="sdot"></span></div>
+      <div class="hdr-sub">Tick ✓ hoàn thành · ✗ skip + lý do</div>
+    </div>
+    <div style="display:flex;justify-content:center;margin:6px 0 2px">
+      <svg width="76" height="76" viewBox="0 0 76 76" style="transform:rotate(-90deg)">
+        <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
+        <circle id="prog-ring" cx="38" cy="38" r="30" fill="none" stroke="#6B7280" stroke-width="5"
+          stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5"
+          style="transition:stroke-dashoffset .6s ease,stroke .4s"/>
+        <text id="prog-pct" x="38" y="38" text-anchor="middle" dominant-baseline="middle"
+          fill="#F9FAFB" font-size="13" font-weight="500" font-family="'DM Sans',sans-serif"
+          style="transform:rotate(90deg);transform-origin:38px 38px">0%</text>
+      </svg>
+    </div>
+    <div>
+      <div class="prog-lbl" id="plbl">Đang tải...</div>
+      <div class="sheet-btns">
+        <button class="sbt sy" id="btn-sy" onclick="syncDown()">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11.5 6.5A5 5 0 1 1 8 1.6"/><path d="M8 1v3.5H11.5"/></svg>
+          Sync từ Sheet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pom" id="pom">
+    <div class="pom-modes">
+      <button class="pmode active" onclick="setPomMain(this)">Pomodoro</button>
+      <button class="pmode" onclick="setPomMode(5,this);hideSub()">Nghỉ ngắn</button>
+      <button class="pmode" onclick="setPomMode(15,this);hideSub()">Nghỉ dài</button>
+    </div>
+    <div class="pom-sub" id="pom-sub">
+      <button class="psub active" id="psub25" onclick="setPomMode(25,this)">25'</button>
+      <button class="psub" id="psub45" onclick="setPomMode(45,this)">45'</button>
+    </div>
+    <div class="pom-bigtime" id="ptime">25:00</div>
+    <div class="pom-controls">
+      <button class="pom-start-btn" id="pstart" onclick="togglePom()">▶ start</button>
+      <button class="pom-reset-btn" onclick="resetPom()">↺</button>
+    </div>
+    <div class="pom-quote" id="pom-quote"></div>
+    <div class="pom-mini-stats"><span id="pom-sessions-done">0</span> phiên · <span id="pom-minutes-done">0</span>' hôm nay</div>
+  </div>
+</div>
+
+<div class="wstrip" id="wstrip"></div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-today" onclick="switchTab('today',this)">📋 Hôm nay</button>
+  <button class="tab" onclick="switchTab('track',this)">📊 Theo dõi</button>
+  <button class="tab" onclick="switchTab('jim',this)">Nguyên tắc Jim Rohn</button>
+  <button class="tab" onclick="switchTab('ideas',this)">💡 Ideas</button>
+</div>
+
+<div id="panel-today" class="panel active"></div>
+<div id="panel-track" class="panel"></div>
+<div id="panel-jim"   class="panel"></div>
+<div id="panel-ideas" class="panel"></div>
+
+<script>
+const AS_URL='https://script.google.com/macros/s/AKfycbzUftympk-3AjcT9SKrJO-vOls7Op3J8XZtpgCvDDWdPS9jlU25lTHy2JUeq-qKJBKpVQ/exec';
+
+const COLORS=[
+  {id:'teal',  dot:'#1D9E75',tag:'rgba(16,185,129,.15)',tagText:'#34D399',label:'Tiếng Anh'},
+  {id:'blue',  dot:'#3B82F6',tag:'rgba(59,130,246,.15)',tagText:'#93C5FD',label:'Đọc sách'},
+  {id:'coral', dot:'#F87171',tag:'rgba(239,68,68,.12)',tagText:'#FCA5A5',label:'Coupon/Ads'},
+  {id:'amber', dot:'#F59E0B',tag:'rgba(245,158,11,.12)',tagText:'#FCD34D',label:'SEO'},
+  {id:'purple',dot:'#818CF8',tag:'rgba(129,140,248,.12)',tagText:'#A5B4FC',label:'Python/LLM'},
+  {id:'green', dot:'#10B981',tag:'rgba(16,185,129,.12)',tagText:'#6EE7B7',label:'Social'},
+  {id:'gray',  dot:'#6B7280',tag:'rgba(107,114,128,.12)',tagText:'#9CA3AF',label:'Khác'},
+  {id:'pink',  dot:'#F472B6',tag:'rgba(244,114,182,.12)',tagText:'#F9A8D4',label:'Coaching'},
+  {id:'violet',dot:'#C084FC',tag:'rgba(192,132,252,.12)',tagText:'#E879F9',label:'Idea'},
+];
+
+const SCHEDULES={
+  t24:{label:'SEO · Học',chip:'lc-a',notice:'🎯 <strong>Tiêu điểm tối nay: học SEO + nghiên cứu từ khóa — đầu vào cho bài blog.</strong> Một việc duy nhất, không nhảy môn. Tự học tạo ra của cải — đây là tài sản không ai dạy trong trường.',
+    rows:[
+      {id:1, time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
+      {id:2, time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm — mục tiêu 3–4 buổi/tuần (không bắt buộc)', color:'purple', section:'Trong giờ làm'},
+      {id:3, time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Trưa'},
+      {id:4, time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Tối'},
+      {id:5, time:'19:30–20:00',task:'Coupon: lên store + ads mồi tìm dự án (dùng template, làm nhanh)', color:'coral', section:''},
+      {id:6, time:'20:00–21:30',task:'SEO: học lý thuyết + nghiên cứu từ khóa đuôi dài, chuẩn bị bài blog', color:'amber', section:'Tiêu điểm tối nay',hl:true},
+      {id:7, time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Hạ màn'},
+      {id:8, time:'21:45–22:00',task:'Wind down — tắt màn hình',                                        color:'gray',  section:''},
+    ]},
+  t36:{label:'SEO · Viết',chip:'lc-a',notice:'✍️ <strong>Tiêu điểm tối nay: VIẾT + đăng 1 bài blog chuẩn SEO.</strong> Xong trước, đẹp sau. Một việc duy nhất. Mỗi bài hữu ích là viên gạch đối thủ làm ẩu không sao chép nhanh được.',
+    rows:[
+      {id:10,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
+      {id:11,time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm — 3–4 buổi/tuần (không bắt buộc)',  color:'purple', section:'Trong giờ làm'},
+      {id:12,time:'12:00–12:30',task:'Đọc sách 30′ — habit neo, không bỏ',                              color:'blue',  section:'Trưa'},
+      {id:13,time:'19:00–19:30',task:'Về nhà + ăn tối + nghỉ',                                          color:'gray',  section:'Tối'},
+      {id:14,time:'19:30–20:00',task:'Coupon: lên store + ads mồi tìm dự án (template, làm nhanh)',      color:'coral', section:''},
+      {id:15,time:'20:00–21:30',task:'SEO: viết + publish 1 bài blog (theo dây chuyền 90′)',            color:'amber', section:'Tiêu điểm tối nay',hl:true},
+      {id:16,time:'21:30–21:45',task:'Duolingo 15′ — làm lúc mệt cũng được',                            color:'teal',  section:'Hạ màn'},
+      {id:17,time:'21:45–22:00',task:'Wind down — tắt màn hình',                                        color:'gray',  section:''},
+    ]},
+  thu:{label:'Coaching',chip:'lc-k',notice:'📌 <strong>Toàn bộ năng lượng cho coaching a Thùy.</strong> Bạn là trung bình cộng của 5 người quanh mình. Đến với ≥3 câu hỏi thực chiến — và áp dụng vào blog trong 48h, nếu không là lãng phí buổi học.',
+    rows:[
+      {id:20,time:'6:00–6:30',  task:'Thức dậy + chuẩn bị đi làm',                                       color:'gray',  section:'Sáng'},
+      {id:21,time:'linh hoạt',  task:'Python/LLM 30–45′ trong giờ làm (nếu sắp xếp được)',               color:'purple', section:'Trong giờ làm'},
+      {id:22,time:'12:00–12:30',task:'Đọc sách 30′',                                                    color:'blue',  section:'Trưa'},
+      {id:23,time:'19:00–19:30',task:'Về nhà + ăn tối nhanh',                                           color:'gray',  section:'Tối'},
+      {id:24,time:'19:30–20:00',task:'Coupon nhanh: lên store + ads mồi (template)',                    color:'coral', section:''},
+      {id:25,time:'20:00–21:00',task:'Chuẩn bị ≥3 câu hỏi thực chiến cho a Thùy',                       color:'amber', section:''},
+      {id:26,time:'21:00–22:30',task:'Coaching SEO với a Thùy — ưu tiên tuyệt đối',                     color:'pink',  section:'Coaching',hl:true},
+      {id:27,time:'22:30+',     task:'Duolingo nhanh + ghi note → ngủ',                                 color:'teal',  section:''},
+    ]},
+  weekend:{label:'Khung giờ vàng',chip:'lc-a',notice:'⚡ <strong>Khung giờ vàng — não tươi nhất tuần.</strong> Việc khó nhất gặp năng lượng cao nhất: viết bài blog sâu + rà ngách ads nào có tín hiệu mua. Không chia nhỏ nhiều môn.',
+    rows:[
+      {id:30,time:'8:00–10:00', task:'Rà ads cả tuần: ngách nào ads mồi có tín hiệu mua? Tắt ngách chết', color:'coral', section:'Sáng'},
+      {id:31,time:'10:00–11:30',task:'SEO deep: viết 1 bài blog dài, chất lượng cao',                    color:'amber', section:'',hl:true},
+      {id:32,time:'11:30–12:00',task:'Duolingo + nghỉ',                                                 color:'teal',  section:''},
+      {id:33,time:'14:00–15:30',task:'SEO: nghiên cứu từ khóa + lên kế hoạch nội dung tuần sau',         color:'amber', section:'Chiều'},
+      {id:34,time:'15:30–16:30',task:'Batch schedule social posts cả tuần',                             color:'green', section:''},
+      {id:35,time:'linh hoạt',  task:'Python/LLM nếu muốn — bù cho tuần (không bắt buộc)',               color:'purple', section:''},
+      {id:36,time:'20:00–21:00',task:'Đọc sách 60′',                                                    color:'blue',  section:'Tối'},
+    ]},
+};
+
+const NOW=new Date();
+function dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const TODAY=dstr(NOW);
+const DOW=NOW.getDay();
+const VDL=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+function getTodaySch(){if(DOW===1||DOW===3)return{key:'t24',sch:SCHEDULES.t24};if(DOW===2||DOW===5)return{key:'t36',sch:SCHEDULES.t36};if(DOW===4)return{key:'thu',sch:SCHEDULES.thu};return{key:'weekend',sch:SCHEDULES.weekend};}
+const{key:TK,sch:TSCH}=getTodaySch();
+document.getElementById('tab-today').textContent='📋 '+VDL[DOW]+', '+NOW.getDate()+'/'+(NOW.getMonth()+1);
+
+let idCnt=200,dragSrc=null;
+const CKK='ck_'+TODAY,SKK='sk_'+TODAY;
+function ldCk(){try{return JSON.parse(localStorage.getItem(CKK)||'{}')}catch{return{}}}
+function svCk(o){try{localStorage.setItem(CKK,JSON.stringify(o))}catch{}}
+function ldSk(){try{return JSON.parse(localStorage.getItem(SKK)||'{}')}catch{return{}}}
+function svSk(o){try{localStorage.setItem(SKK,JSON.stringify(o))}catch{}}
+let CK=ldCk(),SK=ldSk();
+
+function getColor(id){return COLORS.find(c=>c.id===id)||COLORS[6];}
+
+function sdot(s){const d=document.getElementById('sdot');d.className='sync-dot '+s;}
+
+function updateProg(){
+  const rows=TSCH.rows;const done=rows.filter(r=>CK[r.id]).length;
+  const pct=rows.length?Math.round(done/rows.length*100):0;
+  document.getElementById('plbl').textContent=done+' / '+rows.length+' task hôm nay ('+pct+'%)';
+  const circ=188.5;
+  const ring=document.getElementById('prog-ring');
+  const lbl=document.getElementById('prog-pct');
+  if(ring)ring.style.strokeDashoffset=circ*(1-pct/100);
+  if(lbl)lbl.textContent=pct+'%';
+  const color=pct>=80?'#10B981':pct>=50?'#34D399':pct>=25?'#F59E0B':'#6B7280';
+  if(ring)ring.style.stroke=color;
+}
+
+async function logTask(row,status,reason=''){
+  sdot('loading');const c=getColor(row.color);
+  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_task',date:TODAY,task_id:String(row.id),task_name:row.task,category:c.label,tab_group:TK,scheduled_time:row.time,status,skip_reason:reason})});sdot('ok');}
+  catch(e){sdot('err');}
+}
+
+async function syncDown(){
+  const btn=document.getElementById('btn-sy'),orig=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='↻ Đang sync...';sdot('loading');
+  try{
+    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY);
+    const data=await res.json();
+    if(data.success&&data.tasks&&data.tasks.length>0){
+      CK={};SK={};
+      data.tasks.forEach(t=>{const id=parseInt(t.task_id);if(t.status==='done')CK[id]=true;else if(t.status==='skip')SK[id]=t.skip_reason||'';});
+      svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+      sdot('ok');btn.innerHTML='✓ Sync xong ('+data.tasks.length+' task)';
+    }else{sdot('ok');btn.innerHTML='Sheet chưa có data hôm nay';}
+  }catch(e){sdot('err');btn.innerHTML='✗ Lỗi kết nối';}
+  setTimeout(()=>{btn.disabled=false;btn.innerHTML=orig;},3000);
+}
+
+async function loadTodayAuto(){
+  sdot('loading');
+  try{
+    const res=await fetch(AS_URL+'?action=get_today&date='+TODAY);
+    const data=await res.json();
+    if(data.success&&data.tasks&&data.tasks.length>0){
+      data.tasks.forEach(t=>{const id=parseInt(t.task_id);if(t.status==='done'){CK[id]=true;delete SK[id];}else if(t.status==='skip'){SK[id]=t.skip_reason||'';delete CK[id];}});
+      svCk(CK);svSk(SK);renderToday();updateProg();renderWeekStrip();
+    }
+    sdot('ok');
+  }catch(e){sdot(Object.keys(CK).length>0?'ok':'err');}
+}
+
+function renderToday(){
+  const panel=document.getElementById('panel-today'),sch=TSCH;
+  const wrap=document.createElement('div');
+  if(sch.notice){const n=document.createElement('div');n.className='notice';n.innerHTML=sch.notice;wrap.appendChild(n);}
+  const alertBox=document.createElement('div');
+  alertBox.id='idea-alert-container';alertBox.className='idea-alerts';
+  wrap.appendChild(alertBox);
+  const tb=document.createElement('div');tb.className='tbar';
+  tb.innerHTML=`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+    <span class="dchip">${VDL[DOW]}, ${NOW.getDate()}/${NOW.getMonth()+1}/${NOW.getFullYear()}</span>
+    ${sch.label?`<span class="lchip ${sch.chip}">${sch.label}</span>`:''}
+  </div>
+  <button class="addbtn" onclick="addRow()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+    Thêm task
+  </button>`;
+  wrap.appendChild(tb);
+  const tbl=document.createElement('div');tbl.className='sched';tbl.id='today-tbl';
+  const ch=document.createElement('div');ch.className='colh';
+  ch.innerHTML='<span></span><span>Đề xuất</span><span>Task</span><span></span><span style="text-align:center">✓</span><span style="text-align:center">✗</span><span></span>';
+  tbl.appendChild(ch);
+  let ls=null;
+  sch.rows.forEach(row=>{
+    if(row.section&&row.section!==ls){const sh=document.createElement('div');sh.className='sec-hdr';sh.textContent=row.section;tbl.appendChild(sh);ls=row.section;}
+    tbl.appendChild(makeRow(row));
+  });
+  wrap.appendChild(tbl);
+  const dn=document.createElement('div');dn.className='dnwrap';
+  const sn=localStorage.getItem('dnote_'+TODAY)||'';
+  dn.innerHTML=`<div class="dnlbl">Ghi chú ngày ${NOW.getDate()}/${NOW.getMonth()+1}</div>
+    <div class="dnrow"><input class="dninp" id="dninp" placeholder="Đạt được gì? Khó khăn gì? Cần điều chỉnh?" value="${sn}">
+    <button class="dnbtn" onclick="saveNote()">Lưu vào Sheet</button></div>`;
+  wrap.appendChild(dn);
+
+  const ideaWrap=document.createElement('div');ideaWrap.className='idea-input-wrap';
+  const c0=getColor(_ideaColorSel);
+  const cpOpts=COLORS.map(col=>`<div class="idea-cp-opt${col.id===_ideaColorSel?' sel':''}" style="background:${col.dot}" data-cid="${col.id}" onclick="setIdeaColor('${col.id}')" title="${col.label}"></div>`).join('');
+  ideaWrap.innerHTML=`<div class="dnlbl" style="color:#C084FC">💡 Thêm ý tưởng</div>
+    <div class="idea-row1" style="display:flex;gap:8px;align-items:center">
+      <div class="idea-cpick-wrap">
+        <div class="idea-cpick-dot" id="idea-color-btn" style="background:${c0.dot}" onclick="toggleIdeaCpick(event)" title="Chọn màu"></div>
+        <div class="idea-cpick-menu" id="idea-cpick-menu">${cpOpts}</div>
+      </div>
+      <input class="idea-text-inp" id="idea-text" placeholder="Mô tả ý tưởng..." onkeydown="if(event.key==='Enter')addIdea()" style="flex:1">
+      <label class="cb-wrap" title="Xác nhận thêm idea" onclick="addIdea()" style="cursor:pointer;flex-shrink:0">
+        <div class="cbb" id="idea-check-box" style="border-color:rgba(192,132,252,.4)">
+          <span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span>
+        </div>
+      </label>
+    </div>`;
+  wrap.appendChild(ideaWrap);
+
+  panel.innerHTML='';panel.appendChild(wrap);
+  renderIdeaAlerts();
+}
+
+function makeRow(row){
+  const r=document.createElement('div');
+  const isDone=!!CK[row.id],isSkip=row.id in SK;
+  r.className='row'+(isDone?' done-row':isSkip?' skip-row':'')+(row.hl?' hl-row':'');
+  r.dataset.id=row.id;r.draggable=true;
+  const c=getColor(row.color);
+  r.innerHTML=`
+    <div class="dh"><div class="dhd"><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+    <div class="tcell" id="tc-${row.id}" onclick="editTime(${row.id})">${row.time}</div>
+    <div class="taskcell">
+      <div class="cdot" style="background:${c.dot}" onclick="openCP(event,${row.id})"></div>
+      <div style="flex:1">
+        <span class="ttxt" id="tt-${row.id}" onclick="editTask(${row.id})">${row.task}</span>
+        ${isSkip?`<div><span class="skip-badge" title="${SK[row.id]||''}">⚠ ${SK[row.id]||'Đã skip'}</span></div>`:''}
+      </div>
+    </div>
+    <div class="tagcell"><span class="tag" style="background:${c.tag};color:${c.tagText}" onclick="openCP(event,${row.id})">${c.label}</span></div>
+    <div class="chkcell"><label class="cbw"><input type="checkbox" ${isDone?'checked':''} onchange="toggleCheck(${row.id},this)">
+    <div class="cbb"><span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span></div></label></div>
+    <div class="skipcell"><button class="skipbtn ${isSkip?'on':''}" onclick="openSkip(${row.id})" title="Skip với lý do">✕</button></div>
+    <div class="delcell"><button class="delbtn" onclick="deleteRow(${row.id})">×</button></div>
+    <div class="cpick" id="cp-${row.id}"></div>`;
+  const cp=r.querySelector('.cpick');
+  COLORS.forEach(col=>{const d=document.createElement('div');d.className='cpdot'+(col.id===row.color?' sel':'');d.style.background=col.dot;d.title=col.label;d.onclick=e=>{e.stopPropagation();row.color=col.id;cp.classList.remove('open');renderToday();};cp.appendChild(d);});
+  r.addEventListener('dragstart',e=>{dragSrc=r;r.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+  r.addEventListener('dragend',()=>{r.classList.remove('dragging');document.querySelectorAll('.row').forEach(x=>x.classList.remove('drag-over'));});
+  r.addEventListener('dragover',e=>{e.preventDefault();if(dragSrc&&dragSrc!==r){document.querySelectorAll('.row').forEach(x=>x.classList.remove('drag-over'));r.classList.add('drag-over');}});
+  r.addEventListener('drop',e=>{
+    e.preventDefault();
+    if(dragSrc&&dragSrc!==r){
+      const tbl=document.getElementById('today-tbl'),all=[...tbl.querySelectorAll('.row')];
+      const si=all.indexOf(dragSrc),ti=all.indexOf(r);
+      if(si<ti)tbl.insertBefore(dragSrc,r.nextSibling);else tbl.insertBefore(dragSrc,r);
+      const rws=TSCH.rows,sI=rws.findIndex(x=>x.id===parseInt(dragSrc.dataset.id)),tI=rws.findIndex(x=>x.id===parseInt(r.dataset.id));
+      const[mv]=rws.splice(sI,1);rws.splice(sI<tI?tI-1:tI,0,mv);
+    }
+    document.querySelectorAll('.row').forEach(x=>x.classList.remove('drag-over'));
+  });
+  return r;
+}
+
+function toggleCheck(id,el){
+  if(el.checked){CK[id]=true;delete SK[id];}else{delete CK[id];}
+  svCk(CK);svSk(SK);
+  const row=TSCH.rows.find(r=>r.id===id);if(row)logTask(row,el.checked?'done':'miss');
+  updateRowVis(id);updateProg();renderWeekStrip();
+}
+function updateRowVis(id){
+  const r=document.querySelector(`.row[data-id="${id}"]`);if(!r)return;
+  r.classList.toggle('done-row',!!CK[id]);r.classList.toggle('skip-row',id in SK);
+  const sb=r.querySelector('.skipbtn');if(sb)sb.className='skipbtn'+(id in SK?' on':'');
+  const tc=r.querySelector('.taskcell > div');
+  if(tc){let b=tc.querySelector('.skip-badge');if(id in SK){if(!b){b=document.createElement('div');tc.appendChild(b);}b.innerHTML=`<span class="skip-badge" title="${SK[id]||''}">⚠ ${SK[id]||'Đã skip'}</span>`;}else if(b)b.remove();}
+}
+
+let _sid=null;
+function openSkip(id){
+  _sid=id;const row=TSCH.rows.find(r=>r.id===id);
+  document.getElementById('modal-task').textContent=row?row.task:'';
+  document.getElementById('modal-reason').value=SK[id]||'';
+  document.getElementById('mbtn-undo').style.display=(id in SK)?'block':'none';
+  document.getElementById('skip-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-reason').focus(),80);
+}
+function closeSkip(){document.getElementById('skip-modal').classList.remove('open');_sid=null;}
+function confirmSkip(){
+  if(!_sid)return;const reason=document.getElementById('modal-reason').value.trim();
+  SK[_sid]=reason;delete CK[_sid];svCk(CK);svSk(SK);
+  const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'skip',reason);
+  updateRowVis(_sid);updateProg();renderWeekStrip();closeSkip();
+}
+function undoSkip(){if(!_sid)return;delete SK[_sid];svSk(SK);const row=TSCH.rows.find(r=>r.id===_sid);if(row)logTask(row,'miss');updateRowVis(_sid);closeSkip();}
+document.getElementById('skip-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSkip();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSkip();});
+
+function editTime(id){const cell=document.getElementById('tc-'+id);if(!cell||cell.querySelector('input'))return;const val=cell.textContent;cell.innerHTML='';const inp=document.createElement('input');inp.className='tinp';inp.value=val;inp.onclick=e=>e.stopPropagation();const save=()=>{const r=TSCH.rows.find(x=>x.id===id);if(r)r.time=inp.value||val;renderToday();};inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter'||e.key==='Escape')inp.blur();};cell.appendChild(inp);inp.focus();inp.select();}
+function editTask(id){const cell=document.getElementById('tt-'+id);if(!cell||cell.tagName==='INPUT')return;const val=cell.textContent;const inp=document.createElement('input');inp.className='tinpt';inp.value=val;inp.onclick=e=>e.stopPropagation();const save=()=>{const r=TSCH.rows.find(x=>x.id===id);if(r)r.task=inp.value||val;renderToday();};inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter'||e.key==='Escape')inp.blur();};cell.replaceWith(inp);inp.focus();inp.select();}
+function openCP(e,id){e.stopPropagation();document.querySelectorAll('.cpick').forEach(c=>{if(c.id!=='cp-'+id)c.classList.remove('open');});const cp=document.getElementById('cp-'+id);if(cp)cp.classList.toggle('open');}
+document.addEventListener('click',()=>document.querySelectorAll('.cpick').forEach(c=>c.classList.remove('open')));
+function deleteRow(id){TSCH.rows.splice(TSCH.rows.findIndex(r=>r.id===id),1);delete CK[id];delete SK[id];svCk(CK);svSk(SK);renderToday();updateProg();}
+function addRow(){idCnt++;TSCH.rows.push({id:idCnt,time:'00:00–00:00',task:'Nhập tên task...',color:'gray',section:''});renderToday();setTimeout(()=>editTime(idCnt),60);}
+function saveNote(){const val=document.getElementById('dninp').value.trim();if(!val)return;localStorage.setItem('dnote_'+TODAY,val);sdot('loading');fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'log_daily',date:TODAY,day_note:val})}).then(()=>sdot('ok')).catch(()=>sdot('err'));const btn=document.querySelector('.dnbtn'),orig=btn.textContent;btn.textContent='✓ Đã lưu!';setTimeout(()=>{btn.textContent=orig;},2000);}
+
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='track')renderTracking();if(id==='ideas')renderIdeas();}
+
+// ── IDEAS ──
+const IDEAS_KEY='ideas_all';
+let IDEAS=loadIdeas();
+let _ideaSkipId=null;
+let _ideaColorSel='violet';
+let _ideaFilter='all';
+function loadIdeas(){try{return JSON.parse(localStorage.getItem('ideas_all')||'[]')}catch{return[];}}
+function saveIdeas(){try{localStorage.setItem('ideas_all',JSON.stringify(IDEAS))}catch{}}
+
+function addIdea(){
+  const txt=document.getElementById('idea-text').value.trim();
+  if(!txt)return;
+  const box=document.getElementById('idea-check-box');
+  if(box){box.style.background='#C084FC';box.style.borderColor='#C084FC';const ch=box.querySelector('.cbch');if(ch)ch.style.opacity='1';}
+  const idea={id:Date.now(),date_added:TODAY,text:txt,color:_ideaColorSel,deadline:null,status:'pending',skip_reason:'',date_done:null};
+  IDEAS.push(idea);saveIdeas();
+  document.getElementById('idea-text').value='';
+  logIdeaToSheet(idea);
+  renderIdeaAlerts();
+  setTimeout(()=>{const b=document.getElementById('idea-check-box');if(b){b.style.background='';b.style.borderColor='rgba(192,132,252,.4)';const ch=b.querySelector('.cbch');if(ch)ch.style.opacity='0';}},800);
+}
+
+function markIdeaDone(id){
+  const idea=IDEAS.find(x=>x.id===id);if(!idea)return;
+  idea.status='done';idea.date_done=TODAY;
+  saveIdeas();logIdeaToSheet(idea);renderIdeas();renderIdeaAlerts();
+}
+
+function openIdeaSkip(id){
+  _ideaSkipId=id;
+  const idea=IDEAS.find(x=>x.id===id);
+  document.getElementById('idea-modal-name').textContent=idea?idea.text:'';
+  document.getElementById('idea-modal-reason').value=idea?idea.skip_reason||'':'';
+  document.getElementById('idea-skip-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('idea-modal-reason').focus(),80);
+}
+function closeIdeaSkip(){document.getElementById('idea-skip-modal').classList.remove('open');_ideaSkipId=null;}
+function confirmIdeaSkip(){
+  if(!_ideaSkipId)return;
+  const reason=document.getElementById('idea-modal-reason').value.trim();
+  const idea=IDEAS.find(x=>x.id===_ideaSkipId);
+  if(idea){idea.status='skip';idea.skip_reason=reason;saveIdeas();logIdeaToSheet(idea);}
+  renderIdeas();renderIdeaAlerts();closeIdeaSkip();
+}
+function undoIdeaStatus(id){
+  const idea=IDEAS.find(x=>x.id===id);if(!idea)return;
+  idea.status='pending';idea.skip_reason='';idea.date_done=null;
+  saveIdeas();logIdeaToSheet(idea);renderIdeas();renderIdeaAlerts();
+}
+document.getElementById('idea-skip-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeIdeaSkip();});
+
+function editIdeaName(id){
+  const el=document.getElementById('iname-'+id);
+  if(!el||el.tagName==='INPUT')return;
+  const val=el.textContent;
+  const inp=document.createElement('input');
+  inp.className='idea-text-inp';inp.value=val;inp.style.cssText='flex:1;font-size:13px;padding:4px 8px';
+  inp.onclick=e=>e.stopPropagation();
+  const save=()=>{
+    const idea=IDEAS.find(x=>x.id===id);
+    if(idea&&inp.value.trim()){idea.text=inp.value.trim();saveIdeas();logIdeaToSheet(idea);}
+    renderIdeas();
+  };
+  inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter'||e.key==='Escape')inp.blur();};
+  el.replaceWith(inp);inp.focus();inp.select();
+}
+
+function deleteIdea(id){
+  if(!confirm('Xóa ý tưởng này?'))return;
+  IDEAS.splice(IDEAS.findIndex(x=>x.id===id),1);
+  saveIdeas();renderIdeas();renderIdeaAlerts();
+}
+
+let _ideaColorSel2='violet';
+function addIdea2(){
+  const txt=document.getElementById('idea-text2').value.trim();
+  if(!txt)return;
+  const box=document.getElementById('idea-check-box2');
+  if(box){box.style.background='#C084FC';box.style.borderColor='#C084FC';const ch=box.querySelector('.cbch');if(ch)ch.style.opacity='1';}
+  const idea={id:Date.now(),date_added:TODAY,text:txt,color:_ideaColorSel2,deadline:null,status:'pending',skip_reason:'',date_done:null};
+  IDEAS.push(idea);saveIdeas();
+  document.getElementById('idea-text2').value='';
+  logIdeaToSheet(idea);renderIdeaAlerts();
+  setTimeout(()=>{renderIdeas();},900);
+}
+function setIdeaColor2(colorId){
+  _ideaColorSel2=colorId;
+  const c=getColor(colorId);
+  const btn=document.getElementById('idea-color-btn2');
+  if(btn)btn.style.background=c.dot;
+  document.querySelectorAll('#idea-cpick-menu2 .idea-cp-opt').forEach(d=>{d.classList.toggle('sel',d.dataset.cid===colorId);});
+  const m=document.getElementById('idea-cpick-menu2');if(m)m.classList.remove('open');
+}
+function toggleIdeaCpick2(e){
+  e.stopPropagation();
+  document.getElementById('idea-cpick-menu2').classList.toggle('open');
+}
+function setIdeaDeadline(id,val){
+  const idea=IDEAS.find(x=>x.id===id);if(!idea)return;
+  idea.deadline=val||null;saveIdeas();
+  logIdeaToSheet(idea);
+  renderIdeaAlerts();renderIdeas();
+}
+
+async function logIdeaToSheet(idea){
+  sdot('loading');
+  try{await fetch(AS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({
+    action:'log_idea',
+    id:String(idea.id),date_added:idea.date_added,idea:idea.text,
+    color:idea.color,deadline:idea.deadline||'',status:idea.status,
+    skip_reason:idea.skip_reason||'',date_done:idea.date_done||'',logged_at:TODAY,
+  })});sdot('ok');}catch(e){sdot('err');}
+}
+
+function renderIdeaAlerts(){
+  const container=document.getElementById('idea-alert-container');
+  if(!container)return;
+  const today=new Date(TODAY);
+  const urgent=IDEAS.filter(x=>{
+    if(x.status!=='pending'||!x.deadline)return false;
+    const diff=Math.ceil((new Date(x.deadline)-today)/(1000*60*60*24));
+    return diff<=7;
+  });
+  if(!urgent.length){container.innerHTML='';return;}
+  container.innerHTML=urgent.map(x=>{
+    const diff=Math.ceil((new Date(x.deadline)-today)/(1000*60*60*24));
+    const c=getColor(x.color);
+    const urgentCls=diff<=2?'idea-alert-urgent':'';
+    const label=diff<0?'Quá hạn '+Math.abs(diff)+' ngày':diff===0?'Hôm nay':diff+' ngày nữa';
+    return`<div class="idea-alert-card">
+      <div class="idea-alert-dot" style="background:${c.dot}"></div>
+      <span class="idea-alert-name">${x.text}</span>
+      <span class="idea-alert-dead ${urgentCls}">⏰ ${label} — ${x.deadline}</span>
+    </div>`;
+  }).join('');
+}
+
+function setIdeaColor(colorId){
+  _ideaColorSel=colorId;
+  const c=getColor(colorId);
+  const btn=document.getElementById('idea-color-btn');
+  if(btn)btn.style.background=c.dot;
+  document.querySelectorAll('.idea-cp-opt').forEach(d=>{d.classList.toggle('sel',d.dataset.cid===colorId);});
+  document.getElementById('idea-cpick-menu').classList.remove('open');
+}
+
+function toggleIdeaCpick(e){
+  e.stopPropagation();
+  document.getElementById('idea-cpick-menu').classList.toggle('open');
+}
+
+function renderIdeas(){
+  const panel=document.getElementById('panel-ideas');
+  const filtered=IDEAS.filter(x=>{
+    if(_ideaFilter==='all') return true;
+    if(_ideaFilter==='pending') return x.status==='pending';
+    if(_ideaFilter==='done') return x.status==='done';
+    if(_ideaFilter==='skip') return x.status==='skip';
+    return true;
+  }).sort((a,b)=>a.id-b.id);
+
+  const c0=getColor(_ideaColorSel);
+  const cpOpts=COLORS.map(col=>`<div class="idea-cp-opt${col.id===_ideaColorSel?' sel':''}" style="background:${col.dot}" data-cid="${col.id}" onclick="setIdeaColor('${col.id}')" title="${col.label}"></div>`).join('');
+
+  const addHtml=`<div class="idea-input-wrap" style="margin-bottom:12px">
+    <div class="dnlbl" style="color:#C084FC">💡 Thêm ý tưởng mới</div>
+    <div class="idea-row1" style="display:flex;gap:8px;align-items:center">
+      <div class="idea-cpick-wrap">
+        <div class="idea-cpick-dot" id="idea-color-btn2" style="background:${c0.dot}" onclick="toggleIdeaCpick2(event)" title="Chọn màu"></div>
+        <div class="idea-cpick-menu" id="idea-cpick-menu2">${cpOpts.replace(/onclick="setIdeaColor/g,"onclick=\"setIdeaColor2")}</div>
+      </div>
+      <input class="idea-text-inp" id="idea-text2" placeholder="Mô tả ý tưởng..." onkeydown="if(event.key==='Enter')addIdea2()" style="flex:1">
+      <label class="cb-wrap" title="Xác nhận thêm" onclick="addIdea2()" style="cursor:pointer;flex-shrink:0">
+        <div class="cbb" id="idea-check-box2" style="border-color:rgba(192,132,252,.4)">
+          <span class="cbch"><svg viewBox="0 0 13 10"><polyline points="1.5,5 5,8.5 11.5,1.5"/></svg></span>
+        </div>
+      </label>
+    </div>
+  </div>`;
+
+  const filterHtml=`<div class="ideas-filter">
+    ${['all','pending','done','skip'].map(f=>`<button class="ifbtn${_ideaFilter===f?' on':''}" onclick="_ideaFilter='${f}';renderIdeas()">${{all:'Tất cả',pending:'Chưa xong',done:'Hoàn thành',skip:'Bỏ qua'}[f]}</button>`).join('')}
+    <span style="margin-left:auto;font-size:11px;color:var(--text3);align-self:center">${IDEAS.filter(x=>x.status==='pending').length} đang chờ</span>
+  </div>`;
+
+  const cardsHtml=filtered.length?filtered.map(x=>{
+    const c=getColor(x.color);
+    const today=new Date(TODAY);
+    let deadBadge='';
+    if(x.deadline){
+      const diff=Math.ceil((new Date(x.deadline)-today)/(1000*60*60*24));
+      const bc=diff<0?'rgba(239,68,68,.15)':diff<=2?'rgba(245,158,11,.15)':'rgba(255,255,255,.06)';
+      const tc=diff<0?'#F87171':diff<=2?'#FCD34D':c.tagText;
+      const lbl=diff<0?`Quá hạn ${Math.abs(diff)}n`:diff===0?'Hôm nay':`${diff} ngày`;
+      deadBadge=`<span class="idea-date-badge" style="background:${bc};color:${tc};border-color:${tc}40">⏰ ${lbl}</span>`;
+    }
+    const actionBtns=x.status==='pending'
+      ?`<button class="iabtn done" onclick="markIdeaDone(${x.id})">✓ Xong</button><button class="iabtn skip" onclick="openIdeaSkip(${x.id})">✕ Bỏ</button>`
+      :`<button class="iabtn" onclick="undoIdeaStatus(${x.id})">↩ Khôi phục</button>`;
+    const skipNote=x.status==='skip'&&x.skip_reason?`<div class="idea-skip-reason">Lý do: ${x.skip_reason}</div>`:'';
+    const datePicker=x.status==='pending'
+      ?`<div style="display:flex;align-items:center;gap:6px;margin-top:7px">
+          <span style="font-size:10px;color:var(--text3)">Hoàn thành trước:</span>
+          <input type="date" class="idea-date-inp" style="width:140px;font-size:11px;padding:3px 8px" value="${x.deadline||''}" onchange="setIdeaDeadline(${x.id},this.value)">
+          ${deadBadge}
+        </div>`:'';
+    return`<div class="idea-card ${x.status==='done'?'done-idea':x.status==='skip'?'skip-idea':''}" id="icard-${x.id}">
+      <div class="idea-cdot" style="background:${c.dot}"></div>
+      <div class="idea-body">
+        <div class="idea-name ${x.status==='done'?'done-txt':''}" id="iname-${x.id}" onclick="editIdeaName(${x.id})">${x.text}</div>
+        <div class="idea-meta"><span class="idea-added-lbl">Thêm ${x.date_added}</span></div>
+        ${datePicker}${skipNote}
+      </div>
+      <div class="idea-actions">
+        ${actionBtns}
+        <button class="iabtn" onclick="editIdeaName(${x.id})" title="Sửa">✏️</button>
+        <button class="iabtn" onclick="deleteIdea(${x.id})" title="Xóa" style="border-color:rgba(239,68,68,.2);color:#F87171">🗑</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="ideas-empty">Không có ý tưởng nào trong mục này.</div>';
+
+  panel.innerHTML=addHtml+filterHtml+'<div class="ideas-wrap">'+cardsHtml+'</div>';
+
+  // wire up color picker 2
+  document.addEventListener('click',e=>{
+    const m=document.getElementById('idea-cpick-menu2');
+    if(m&&!m.contains(e.target)&&e.target.id!=='idea-color-btn2')m.classList.remove('open');
+  },{once:true});
+}
+
+// ── POMODORO ──
+let ps=25*60,pt=25*60,pr=false,ptimer=null,pd=false,pSessions=0,pMinutes=0;
+function setPomMain(btn){
+  if(pr)return;
+  document.querySelectorAll('.pmode').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pom-sub').style.display='flex';
+  const activeMin=document.querySelector('.psub.active');
+  const min=activeMin&&activeMin.id==='psub45'?45:25;
+  ps=pt=min*60;pd=false;pomUI();
+}
+function hideSub(){
+  document.getElementById('pom-sub').style.display='none';
+}
+function setPomMode(min,btn){
+  if(pr)return;ps=pt=min*60;pd=false;
+  if(btn.classList.contains('psub')){
+    document.querySelectorAll('.psub').forEach(b=>b.classList.remove('active'));
+  } else {
+    document.querySelectorAll('.pmode').forEach(b=>b.classList.remove('active'));
+  }
+  btn.classList.add('active');pomUI();
+}
+function togglePom(){
+  if(pd){resetPom();return;}
+  pr=!pr;
+  if(pr){ptimer=setInterval(()=>{ps--;if(ps<=0){clearInterval(ptimer);pr=false;pd=true;ps=0;pSessions++;pMinutes+=Math.round(pt/60);document.getElementById('pom-sessions-done').textContent=pSessions;document.getElementById('pom-minutes-done').textContent=pMinutes;playDing();}pomUI();},1000);}
+  else{clearInterval(ptimer);}pomUI();
+}
+function resetPom(){clearInterval(ptimer);pr=false;pd=false;ps=pt;pomUI();}
+const POM_QUOTES=[
+  '"Kỷ luật nhỏ, thực hành mỗi ngày."',
+  '"Động lực giúp bắt đầu. Thói quen giúp tiếp tục."',
+  '"Đừng mong việc dễ hơn — mong bản thân giỏi hơn."',
+  '"Hoặc bạn làm chủ ngày, hoặc ngày làm chủ bạn."',
+  '"Kỷ luật đau 1 lần. Hối tiếc đau cả đời."',
+  '"Tự học tạo ra của cải."',
+  '"Làm việc với bản thân chăm hơn ở công ty."',
+];
+let _quoteIdx=Math.floor(Math.random()*POM_QUOTES.length);
+function initQuote(){
+  const el=document.getElementById('pom-quote');
+  if(el)el.textContent=POM_QUOTES[_quoteIdx];
+  setInterval(()=>{
+    const el=document.getElementById('pom-quote');if(!el)return;
+    el.classList.add('fade');
+    setTimeout(()=>{_quoteIdx=(_quoteIdx+1)%POM_QUOTES.length;el.textContent=POM_QUOTES[_quoteIdx];el.classList.remove('fade');},400);
+  },8000);
+}
+
+function pomUI(){
+  const m=String(Math.floor(ps/60)).padStart(2,'0'),s=String(ps%60).padStart(2,'0');
+  document.getElementById('ptime').textContent=`${m}:${s}`;
+  const btn=document.getElementById('pstart');
+  if(btn)btn.textContent=pd?'↺ lại':pr?'⏸ pause':'▶ start';
+}
+function playDing(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[880,1100,880].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=f;const t=ctx.currentTime+i*.22;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.35,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.55);o.start(t);o.stop(t+.6);});}catch(e){}}
+
+// ── WEEK STRIP ──
+function wkno(d){const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));dt.setUTCDate(dt.getUTCDate()+4-(dt.getUTCDay()||7));const ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));return Math.ceil((((dt-ys)/86400000)+1)/7);}
+function ldck(ds){try{return JSON.parse(localStorage.getItem('ck_'+ds)||'{}')}catch{return{};}}
+
+function renderWeekStrip(){
+  const d=NOW.getDay(),mon=new Date(NOW);mon.setDate(NOW.getDate()-((d+6)%7));
+  const wdays=Array.from({length:7},(_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);return x;});
+  const strip=document.getElementById('wstrip');
+  strip.innerHTML=`<div class="wstop"><div class="wstlbl">📅 ${VDL[DOW]}, ${NOW.getDate()}/${String(NOW.getMonth()+1).padStart(2,'0')}/${NOW.getFullYear()}</div><div class="wstsub">Tuần ${wkno(NOW)}</div></div><div class="wdays" id="wdg"></div>`;
+  const tot=TSCH.rows.length,g=strip.querySelector('#wdg');
+  const dn=['T2','T3','T4','T5','T6','T7','CN'];
+  wdays.forEach((day,i)=>{
+    const ds=dstr(day),isToday=ds===TODAY,done=Object.keys(ldck(ds)).filter(id=>parseInt(id)<200).length,pct=tot?Math.round(done/tot*100):0;
+    const dc=pct>=70?'hi':pct>=40?'mi':pct>0?'lo':'';
+    const cell=document.createElement('div');
+    cell.className='wday'+(isToday?' today':done>0?' has-data':'');
+    cell.innerHTML=`<span class="wdn">${dn[i]}</span><span class="wdd">${day.getDate()}</span><span class="wds">${day.getMonth()+1}/${String(day.getFullYear()).slice(2)}</span><div class="wddot ${dc}"></div>`;
+    g.appendChild(cell);
+  });
+}
+
+// ── TRACKING ──
+const TTOT=TSCH.rows.length;
+function pc(p){return p>=80?'#10B981':p>=60?'#34D399':p>=40?'#F59E0B':'#EF4444';}
+function pst(p){if(!p)return '<span class="trkst sn">Không có</span>';if(p>=80)return '<span class="trkst sg">Xuất sắc</span>';if(p>=60)return '<span class="trkst sd">Tốt</span>';if(p>=40)return '<span class="trkst so">Trung bình</span>';return '<span class="trkst sl">Thấp</span>';}
+function hist28(){
+  const today=new Date();
+  const schedIds=new Set(TSCH.rows.map(r=>String(r.id)));
+  return Array.from({length:28},(_,i)=>{
+    const d=new Date(today);
+    d.setDate(today.getDate()-(27-i));
+    const ds=dstr(d);
+    const done=Object.keys(ldck(ds)).filter(id=>schedIds.has(id)).length;
+    const pct=TTOT?Math.round(done/TTOT*100):0;
+    return{date:d,ds,done,pct,isToday:i===27};
+  });
+}
+function renderTracking(){
+  const h=hist28(),td=h[27];
+  let streak=0;for(let i=26;i>=0;i--){if(h[i].pct>0)streak++;else break;}
+  const act=h.filter(x=>x.pct>0),avg=act.length?Math.round(act.reduce((s,x)=>s+x.pct,0)/act.length):0;
+  const p=document.getElementById('panel-track');
+  p.innerHTML=`<div class="trkstats">
+    <div class="trkstat"><div class="trkval" style="color:#10B981">${td.pct}%</div><div class="trklab">Hôm nay</div></div>
+    <div class="trkstat"><div class="trkval" style="color:#F59E0B">${streak}</div><div class="trklab">🔥 Streak</div></div>
+    <div class="trkstat"><div class="trkval">${avg}%</div><div class="trklab">Trung bình</div></div>
+    <div class="trkstat"><div class="trkval">${act.length}</div><div class="trklab">Ngày có data</div></div>
+  </div>
+  <div class="trksec">4 tuần gần nhất</div>
+  <div class="calgrid" id="cg"></div>
+  <div class="trkbar"><div class="trksec" style="margin:0">Lịch sử theo ngày</div>
+    <button class="expbtn" onclick="exportCSV()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 9V1M3.5 6.5l3 3 3-3"/><path d="M1 10v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V10"/></svg>
+      Xuất CSV
+    </button>
+  </div>
+  <div class="trklist"><div class="trkrow trkh"><span>Ngày</span><span>Tiến độ</span><span style="text-align:right">%</span><span style="text-align:center">Đánh giá</span></div><div id="trk-body"></div></div>`;
+  const dw=['CN','T2','T3','T4','T5','T6','T7'],cg=p.querySelector('#cg');
+  dw.forEach(x=>{const el=document.createElement('div');el.className='calh';el.textContent=x;cg.appendChild(el);});
+  const fd=h[0].date.getDay();for(let i=0;i<fd;i++)cg.appendChild(document.createElement('div'));
+  h.forEach(day=>{
+    const c=document.createElement('div');c.className='cald'+(day.pct>0?' has':'')+(day.isToday?' td':'');
+    const bc=day.pct>0?pc(day.pct):undefined;
+    c.innerHTML=`<span class="calnum">${day.date.getDate()}</span><div class="calbar" style="${bc?`background:${bc};width:${day.pct}%`:''}"></div>${day.pct>0?`<div class="caltip">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1} — ${day.done}/${TTOT} (${day.pct}%)</div>`:''}`;
+    cg.appendChild(c);
+  });
+  const body=p.querySelector('#trk-body');
+  [...h].reverse().forEach(day=>{if(!day.pct&&!day.isToday)return;const r=document.createElement('div');r.className='trkrow';r.innerHTML=`<span class="trkdate">${VDL[day.date.getDay()]} ${day.date.getDate()}/${day.date.getMonth()+1}${day.isToday?' <b>(hôm nay)</b>':''}</span><div><div class="trkpw"><div class="trkpf" style="width:${day.pct}%;background:${pc(day.pct)}"></div></div></div><span class="trkpn">${day.pct}%</span>${pst(day.pct)}`;body.appendChild(r);});
+  if(!body.children.length)body.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Bắt đầu tick checkbox để có dữ liệu.</div>';
+}
+function exportCSV(){const rows=[['Ngày','Thứ','Done','Tổng','%']];hist28().filter(d=>d.done>0||d.isToday).forEach(d=>rows.push([d.ds,VDL[d.date.getDay()],d.done,TTOT,d.pct]));const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='tracking-'+TODAY+'.csv';a.click();}
+
+// ── JIM ROHN ──
+function renderJim(){
+  const p=document.getElementById('panel-jim');
+  const bc=['#10B981','#F87171','#818CF8','#F59E0B','#3B82F6','#F472B6','#34D399','#6B7280','#10B981'];
+  const pp=[
+    {v:'Chỉ 1 habit tại một thời điểm. Thành thạo rồi mới thêm.',e:'"Always start with only one habit at a time."',a:'<strong>Tuần 1:</strong> chỉ Duolingo 15 phút/sáng. Không thêm gì khác cho đến khi tự động.'},
+    {v:'Hoặc bạn làm chủ ngày, hoặc ngày làm chủ bạn.',e:'"Either you run the day, or the day runs you."',a:'Lịch trình này là công cụ làm chủ — không phải áp lực.'},
+    {v:'Động lực giúp bắt đầu. Thói quen giúp tiếp tục.',e:'"Motivation is what gets you started. Habit is what keeps you going."',a:'Không chờ có hứng. Mở Duolingo trước khi xuống giường.'},
+    {v:'Kỷ luật nhỏ, thực hành mỗi ngày.',e:'"Success is nothing more than a few simple disciplines, practiced every day."',a:'15 phút Duolingo + 30 phút đọc sách = 2 kỷ luật neo, không thể bỏ.'},
+    {v:'Làm việc với bản thân chăm hơn ở công ty.',e:'"Work harder on yourself than you do on your job."',a:'1 tiếng tối nay xây dựng bạn cho 5 năm tới. Bảo vệ nó.'},
+    {v:'Tự học tạo ra của cải.',e:'"Formal education will make you a living; self-education will make you a fortune."',a:'SEO, Python, Ads — tài sản bạn đang tự xây mỗi tối.'},
+    {v:'Đừng mong việc dễ hơn — mong bản thân giỏi hơn.',e:'"Don\'t wish it was easier; wish you were better."',a:'Ads không convert? Hỏi "cần học thêm skill gì?" không phải "sản phẩm tệ".'},
+    {v:'Kỷ luật đau 1 lần. Hối tiếc đau cả đời.',e:'"We must all suffer one of two things: the pain of discipline or the pain of regret."',a:'Bỏ 1 tối vì mệt: không sao. Bỏ 3 tháng liên tiếp: tiếc.'},
+    {v:'Bạn là trung bình cộng của 5 người xung quanh.',e:'"You are the average of the five people you spend the most time with."',a:'Coaching a Thùy thứ 5 = tư duy người đi trước. Đến tươi tỉnh, có câu hỏi thực chiến.'},
+  ];
+  p.innerHTML=`<div class="jimintro"><div class="jimq">"Formal education will make you a living. Self-education will make you a fortune."</div><div class="jims">Jim Rohn (1930–2009) — Triết gia kinh doanh, người thầy của Tony Robbins và Brian Tracy</div></div><div class="jimgrid" id="jg"></div>`;
+  const g=p.querySelector('#jg');
+  pp.forEach((x,i)=>{const c=document.createElement('div');c.className='jimc';c.style.borderLeftColor=bc[i];c.innerHTML=`<div class="jimn">Nguyên tắc ${i+1}</div><div class="jimv">${x.v}</div><div class="jime">${x.e}</div><div class="jima">${x.a}</div>`;g.appendChild(c);});
+}
+
+
+
+renderToday();renderJim();pomUI();initQuote();renderWeekStrip();updateProg();loadTodayAuto();
+document.addEventListener('click',()=>{const m=document.getElementById('idea-cpick-menu');if(m)m.classList.remove('open');});
+</script>
+</body>
+</html>
