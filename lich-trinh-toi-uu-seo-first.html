@@ -828,8 +828,9 @@ function renderIdeas(){
     </div>
   </div>`;
 
+  const _fLbl={all:'Tất cả',pending:'Chưa xong',done:'Hoàn thành',skip:'Bỏ qua'};
   const filterHtml=`<div class="ideas-filter">
-    ${['all','pending','done','skip'].map(f=>`<button class="ifbtn${_ideaFilter===f?' on':''}" onclick="_ideaFilter='${f}';renderIdeas()">${{all:'Tất cả',pending:'Chưa xong',done:'Hoàn thành',skip:'Bỏ qua'}[f]}</button>`).join('')}
+    ${['all','pending','done','skip'].map(f=>`<button class="ifbtn${_ideaFilter===f?' on':''}" onclick="_ideaFilter='${f}';renderIdeas()">${_fLbl[f]}</button>`).join('')}
     <span style="margin-left:auto;font-size:11px;color:var(--text3);align-self:center">${IDEAS.filter(x=>x.status==='pending').length} đang chờ</span>
   </div>`;
 
